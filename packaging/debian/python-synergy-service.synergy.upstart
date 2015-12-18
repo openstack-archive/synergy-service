@@ -1,0 +1,19 @@
+description "Synergy service"
+author "Lisa Zangrando <lisa.zangrando@pd.infn.it>"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+pre-start script
+	for i in "lock run log lib"; do
+		mkdir -p /var/"$i"/synergy
+		chown synergy:synergy /var/"$i"/synergy
+	done
+end script
+
+script
+	DAEMON_ARGS=""
+	exec start-stop-daemon --start --chdir /var/lib/synergy \
+		--chuid synergy:synergy --make-pidfile --pidfile /var/run/synergy/synergy.pid \
+		--exec /usr/bin/synergy -- --config-file=/etc/synergy/synergy.conf ${DAEMON_ARGS}
+end script
