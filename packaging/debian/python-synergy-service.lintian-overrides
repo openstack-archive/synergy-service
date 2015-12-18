@@ -1,0 +1,5 @@
+# Both systemv init and systemd scripts are provided.
+# Systemd script is automatically provided with the name "synergy-service",
+# whereas the init script is provided with the name "python-synergy-service".
+# Lintian complains because they don't have the same name.
+systemd-no-service-for-init-script
