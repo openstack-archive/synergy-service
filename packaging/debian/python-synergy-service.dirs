@@ -1,0 +1,5 @@
+etc/synergy
+var/lib/synergy
+var/log/synergy
+var/run/synergy
+var/lock/synergy
