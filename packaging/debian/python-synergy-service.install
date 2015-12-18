@@ -1,0 +1,2 @@
+config/synergy.conf     /etc/synergy
+scripts/synergy.service /lib/systemd/system

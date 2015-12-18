@@ -1,0 +1,12 @@
+[Unit]
+Description=Synergy service
+After=mysql.service postgresql.service slapd.service rabbitmq-server.service ntp.service 
+
+[Service]
+User=synergy
+Group=synergy
+WorkingDirectory=/var/lib/synergy
+ExecStart=/usr/bin/synergy
+
+[Install]
+WantedBy=multi-user.target
