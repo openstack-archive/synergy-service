@@ -1,0 +1,25 @@
+Source: python-synergy-service
+Section: contrib/python
+Priority: optional
+Maintainer: Vincent Llorens <vincent.llorens@cc.in2p3.fr>
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               dh-systemd,
+               git-core,
+               python-all,
+               python-pbr,
+               python-setuptools
+Standards-Version: 3.9.5
+Homepage: https://launchpad.net/synergy-service
+Vcs-Git: git://git.launchpad.net/synergy-service
+Vcs-Browser: https://git.launchpad.net/synergy-service
+
+Package: python-synergy-service
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}, adduser
+Description: Synergy service for OpenStack.
+ Synergy is as a new extensible general purpose management OpenStack service.
+ Its capabilities are implemented by a collection of managers which are
+ specific and independent pluggable tasks, executed periodically or
+ interactively. The managers can interact with each other in a loosely
+ coupled way.
