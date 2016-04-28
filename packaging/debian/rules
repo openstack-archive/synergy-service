@@ -24,6 +24,8 @@ export PYBUILD_NAME=python-synergy-service
 override_dh_installinit:
 	dh_installinit --name synergy
 
+override_dh_auto_test:
+
 # debmake generated override targets
 # This is example for Cmake (See http://bugs.debian.org/641051 )
 #override_dh_auto_configure:

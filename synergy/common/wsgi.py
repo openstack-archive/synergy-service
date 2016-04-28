@@ -6,6 +6,9 @@ import socket
 import ssl
 import time
 
+from eventlet import greenio as eventlet_greenio
+from eventlet import wsgi as eventlet_wsgi
+
 from synergy.common import log as logging
 from sys import exc_info
 from traceback import format_tb
@@ -141,7 +144,7 @@ class Server(object):
         """
 
         # Raise the default from 8192 to accommodate large tokens
-        eventlet.wsgi.MAX_HEADER_LINE = max_header_line
+        eventlet_wsgi.MAX_HEADER_LINE = max_header_line
 
         self.name = name
         self.host_name = host_name
@@ -247,7 +250,7 @@ class Server(object):
 
         if not self.socket:
             raise RuntimeError("Could not bind to %s:%s after trying for %d s"
-                               % (self.host_host, self.host_port,
+                               % (self.host_name, self.host_port,
                                   self.retry_until_window))
 
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -278,7 +281,7 @@ class Server(object):
         # self.pool.waitall()
 
         if self.socket:
-            eventlet.greenio.shutdown_safe(self.socket)
+            eventlet_greenio.shutdown_safe(self.socket)
             self.socket.close()
 
         self.running = False
@@ -293,7 +296,7 @@ class Server(object):
     def _single_run(self, application, sock):
         """Start a WSGI server in a new green thread."""
         LOG.info("Starting single process server")
-        eventlet.wsgi.server(sock, application,
+        eventlet_wsgi.server(sock, application,
                              custom_pool=self.pool,
                              log=WSGILog(LOG),
                              debug=False)

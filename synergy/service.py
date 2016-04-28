@@ -410,7 +410,6 @@ class Synergy(service.Service):
             tcp_keepidle=CONF.WSGI.tcp_keepidle,
             backlog=CONF.WSGI.backlog)
 
-        self.wsgi_server.register(r'^$', wsgi.index)
         self.wsgi_server.register(r'synergy/list', self.listManagers)
         self.wsgi_server.register(r'synergy/status', self.getManagerStatus)
         self.wsgi_server.register(r'synergy/execute', self.executeCommand)
