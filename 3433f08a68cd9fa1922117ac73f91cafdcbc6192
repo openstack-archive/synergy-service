@@ -1,0 +1,10 @@
+Code-Review+2: Vincent Llorens <vincent.llorens@cc.in2p3.fr>
+Workflow+1: Vincent Llorens <vincent.llorens@cc.in2p3.fr>
+Code-Review+2: Lisa Zangrando <lisa.zangrando@pd.infn.it>
+Workflow+1: Lisa Zangrando <lisa.zangrando@pd.infn.it>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 28 Apr 2016 15:53:18 +0000
+Reviewed-on: https://review.openstack.org/310814
+Project: openstack/synergy-service
+Branch: refs/heads/master
