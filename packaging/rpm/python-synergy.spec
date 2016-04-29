@@ -1,8 +1,8 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:           python-synergy-service
-Version:        0.1
-Release:        1%{?dist}
+Version:        0.2
+Release:        2%{?dist}
 Summary:        Synergy service
 
 License:        ASL 2.0
@@ -84,7 +84,7 @@ exit 0
 
 
 %postun
-%systemd_postun_with_restart synergy.service 
+%systemd_postun_with_restart synergy.service
 if [ "$1" = 0 ]; then
     userdel -r synergy
     groupdel synergy
@@ -92,5 +92,8 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Fri Apr 29 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 0.2-2
+- Working release with minimum set of functionalities
+
 * Wed Jan 20 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr>
 - WIP RPM release
