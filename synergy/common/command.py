@@ -1,3 +1,4 @@
+from synergy.common import context
 from synergy.common import serializer
 
 __author__ = "Lisa Zangrando"

@@ -4,7 +4,6 @@ except ImportError:
     import oslo.messaging as oslo_messaging
 
 from synergy.common import context as ctx
-from synergy.common import log as logging
 from synergy.common import utils
 
 
@@ -25,9 +24,6 @@ software distributed under the License is distributed on an
 either express or implied.
 See the License for the specific language governing
 permissions and limitations under the License."""
-
-
-LOG = logging.getLogger(__name__)
 
 
 class SynergyObject(object):

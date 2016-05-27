@@ -1,7 +1,8 @@
 import copy
-import datetime
-import six
 import uuid
+import six
+
+from datetime import datetime
 
 
 __author__ = "Lisa Zangrando"
@@ -39,16 +40,27 @@ class RequestContext(object):
                  request_id=None, auth_token=None, overwrite=True,
                  quota_class=None, user_name=None, project_name=None,
                  service_catalog=None, instance_lock_checked=False, **kwargs):
+        """:param read_deleted: 'no' indicates deleted records are hidden,
+                'yes' indicates deleted records are visible,
+                'only' indicates that *only* deleted records are visible.
+
+
+           :param overwrite: Set to False to ensure that the greenthread local
+                copy of the index is not overwritten.
+
+           :param kwargs: Extra arguments that might be present, but we ignore
+                because they possibly came in from older rpc messages.
+        """
+
         self.user_id = user_id
         self.project_id = project_id
         self.roles = roles or []
         self.read_deleted = read_deleted
         self.remote_address = remote_address
         if not timestamp:
-            timestamp = datetime.datetime.utcnow()
+            timestamp = datetime.utcnow()
         if isinstance(timestamp, six.string_types):
-            timestamp = datetime.datetime.strptime(timestamp,
-                                                   '%Y-%m-%dT%H:%M:%S.%f')
+            timestamp = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
         self.timestamp = timestamp
         if not request_id:
             request_id = generate_request_id()
@@ -99,16 +111,14 @@ class RequestContext(object):
         pass
 
     def toDict(self):
-        date_format = "%Y-%m-%dT%H:%M:%S.%f"
-
         return {'user_id': self.user_id,
                 'project_id': self.project_id,
                 'is_admin': self.is_admin,
                 'read_deleted': self.read_deleted,
                 'roles': self.roles,
                 'remote_address': self.remote_address,
-                'timestamp': datetime.datetime.strptime(self.timestamp,
-                                                        date_format),
+                'timestamp': datetime.strptime(self.timestamp,
+                                               '%Y-%m-%dT%H:%M:%S.%f'),
                 'request_id': self.request_id,
                 'auth_token': self.auth_token,
                 'quota_class': self.quota_class,
