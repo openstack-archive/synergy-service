@@ -5,17 +5,17 @@ import sys
 from cgi import escape
 from cgi import parse_qs
 from pkg_resources import iter_entry_points
-from synergy.common import config
-from synergy.common import log as logging
-from synergy.common import serializer
-from synergy.common import service
-from synergy.common import wsgi
 
 try:
     from oslo_config import cfg
 except ImportError:
     from oslo.config import cfg
 
+from synergy.common import config
+from synergy.common import log as logging
+from synergy.common import serializer
+from synergy.common import service
+from synergy.common import wsgi
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
@@ -34,7 +34,6 @@ software distributed under the License is distributed on an
 either express or implied.
 See the License for the specific language governing
 permissions and limitations under the License."""
-
 
 CONF = cfg.CONF
 LOG = None
@@ -162,14 +161,14 @@ class Synergy(service.Service):
 
                 CONF.register_opts(config.manager_opts, group=entry.name)
 
-                manager_conf = CONF.get(entry.name)
+                # manager_conf = CONF.get(entry.name)
                 manager_class = entry.load()
 
                 manager_obj = manager_class(*args, **kwargs)
                 LOG.info("manager instance %r created!", entry.name)
 
-                manager_obj.setAutoStart(manager_conf.autostart)
-                manager_obj.setRate(manager_conf.rate)
+                manager_obj.setAutoStart(CONF.get(entry.name).autostart)
+                manager_obj.setRate(CONF.get(entry.name).rate)
 
                 self.managers[manager_obj.getName()] = manager_obj
 
@@ -264,7 +263,9 @@ class Synergy(service.Service):
         if manager_name in self.managers:
             manager = self.managers[manager_name]
             try:
-                manager.execute(cmd=command)
+                cmd_result = manager.execute(command=command.getName(),
+                                             **command.getParameters())
+                command.addResult("result", cmd_result)
                 result = synergySerializer.serialize_entity(context=None,
                                                             entity=command)
                 # LOG.info("command result %s" % result)
@@ -284,7 +285,6 @@ class Synergy(service.Service):
         manager_list = None
         result = {}
 
-        # synergySerializer = serializer.SynergySerializer()
         query = environ.get("QUERY_STRING", None)
 
         if query:
