@@ -1,5 +1,6 @@
 import logging
 import logging.handlers
+import os
 
 try:
     from oslo_config import cfg
@@ -52,6 +53,10 @@ def getLogger(name="unknown"):
 
         # create a logging format
         formatter = logging.Formatter(CONF.Logger.formatter)
+
+        log_dir = os.path.dirname(CONF.Logger.filename)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
 
         # Add the log message handler to the logger
         handler = logging.handlers.RotatingFileHandler(

@@ -1,7 +1,8 @@
 import copy
-import datetime
 import six
 import uuid
+
+from datetime import datetime
 
 
 __author__ = "Lisa Zangrando"
@@ -45,10 +46,9 @@ class RequestContext(object):
         self.read_deleted = read_deleted
         self.remote_address = remote_address
         if not timestamp:
-            timestamp = datetime.datetime.utcnow()
+            timestamp = datetime.utcnow()
         if isinstance(timestamp, six.string_types):
-            timestamp = datetime.datetime.strptime(timestamp,
-                                                   '%Y-%m-%dT%H:%M:%S.%f')
+            timestamp = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
         self.timestamp = timestamp
         if not request_id:
             request_id = generate_request_id()
@@ -99,16 +99,14 @@ class RequestContext(object):
         pass
 
     def toDict(self):
-        date_format = "%Y-%m-%dT%H:%M:%S.%f"
-
         return {'user_id': self.user_id,
                 'project_id': self.project_id,
                 'is_admin': self.is_admin,
                 'read_deleted': self.read_deleted,
                 'roles': self.roles,
                 'remote_address': self.remote_address,
-                'timestamp': datetime.datetime.strptime(self.timestamp,
-                                                        date_format),
+                'timestamp': datetime.strptime(self.timestamp,
+                                               '%Y-%m-%dT%H:%M:%S.%f'),
                 'request_id': self.request_id,
                 'auth_token': self.auth_token,
                 'quota_class': self.quota_class,

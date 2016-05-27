@@ -1,6 +1,8 @@
 from threading import Condition
-from threading import Timer
+from threading import Event
+from threading import Thread
 
+import time
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
@@ -21,17 +23,18 @@ See the License for the specific language governing
 permissions and limitations under the License."""
 
 
-class Manager(object):
+class Manager(Thread):
 
     def __init__(self, name):
+        super(Manager, self).__init__()
+        self.setDaemon(True)
+        self.stop_event = Event()
         self.config_opts = []
         self.condition = Condition()
         self.name = name
         self.status = "CREATED"
         self.autostart = False
         self.rate = -1
-        self.timer = None
-        self.is_running = False
         self.managers = {}
 
     def execute(self, command, *args, **kargs):
@@ -75,8 +78,7 @@ class Manager(object):
         return self.rate
 
     def setRate(self, rate):
-        if rate and rate > 0:
-            self.rate = rate
+        self.rate = rate
 
     def setup(self):
         """Manager initialization
@@ -102,46 +104,17 @@ class Manager(object):
             # if self.status == "RUNNING":
             #     self.__task()
 
-    """
-    def __task(self):
-        if self.rate:
-            if self.status == "RUNNING":
-                self.task()
-                self.timer = Timer(self.rate, self.__task)
-                self.timer.start()
-            else:
-                self.timer.cancel()
-    """
-
-    def start(self):
-        if not self.rate:
-            return
-
-        if not self.is_running and self.rate > 0:
-            self.timer = Timer(self.rate * 60, self._run)
-            self.timer.start()
-            self.is_running = True
-
-    def _run(self):
-        self.is_running = False
-        self.start()
-
-        if self.status == "RUNNING":
-            self.task()
-
     def stop(self):
-        self.timer.cancel()
-        self.is_running = False
+        if self.isAlive():
+            # set event to signal thread to terminate
+            self.stop_event.set()
+            # block calling thread until thread really has terminated
+            self.join()
 
     def run(self):
-        if not self.rate:
-            return
-
-        with self.condition:
-            while self.status != "DESTROYED" and self.status != "ERROR":
-                if self.status == "RUNNING":
-                    self.task()
-
-                    self.condition.wait(self.rate)
-                else:
-                    self.condition.wait()
+        while not self.stop_event.is_set():
+            try:
+                self.task()
+                time.sleep(self.rate * 60)
+            except Exception as ex:
+                print("task %r: %s" % (self.name, ex))
