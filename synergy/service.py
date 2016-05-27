@@ -1,40 +1,39 @@
 import eventlet
-import json
 import sys
+import json
 
-from cgi import escape
 from cgi import parse_qs
+from cgi import escape
 from pkg_resources import iter_entry_points
-from synergy.common import config
-from synergy.common import log as logging
-from synergy.common import serializer
-from synergy.common import service
-from synergy.common import wsgi
 
 try:
     from oslo_config import cfg
 except ImportError:
     from oslo.config import cfg
 
+from synergy.common import config
+from synergy.common import serializer
+from synergy.common import service
+from synergy.common import wsgi
+from synergy.common import log as logging
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
 __copyright__ = """Copyright (c) 2015 INFN - INDIGO-DataCloud
-All Rights Reserved
+                   All Rights Reserved
 
-Licensed under the Apache License, Version 2.0;
-you may not use this file except in compliance with the
-License. You may obtain a copy of the License at:
+                   Licensed under the Apache License, Version 2.0;
+                   you may not use this file except in compliance with the
+                   License. You may obtain a copy of the License at:
 
-   http://www.apache.org/licenses/LICENSE-2.0
+                       http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-either express or implied.
-See the License for the specific language governing
-permissions and limitations under the License."""
-
+                   Unless required by applicable law or agreed to in writing,
+                   software distributed under the License is distributed on an
+                   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+                   either express or implied.
+                   See the License for the specific language governing
+                   permissions and limitations under the License."""
 
 CONF = cfg.CONF
 LOG = None
@@ -162,14 +161,14 @@ class Synergy(service.Service):
 
                 CONF.register_opts(config.manager_opts, group=entry.name)
 
-                manager_conf = CONF.get(entry.name)
+                # manager_conf = CONF.get(entry.name)
                 manager_class = entry.load()
 
                 manager_obj = manager_class(*args, **kwargs)
                 LOG.info("manager instance %r created!", entry.name)
 
-                manager_obj.setAutoStart(manager_conf.autostart)
-                manager_obj.setRate(manager_conf.rate)
+                manager_obj.setAutoStart(CONF.get(entry.name).autostart)
+                manager_obj.setRate(CONF.get(entry.name).rate)
 
                 self.managers[manager_obj.getName()] = manager_obj
 
@@ -264,7 +263,9 @@ class Synergy(service.Service):
         if manager_name in self.managers:
             manager = self.managers[manager_name]
             try:
-                manager.execute(cmd=command)
+                cmd_result = manager.execute(command=command.getName(),
+                                             **command.getParameters())
+                command.addResult("result", cmd_result)
                 result = synergySerializer.serialize_entity(context=None,
                                                             entity=command)
                 # LOG.info("command result %s" % result)
@@ -334,6 +335,7 @@ class Synergy(service.Service):
         manager_list = None
         result = {}
 
+        # synergySerializer = serializer.SynergySerializer()
         query = environ.get("QUERY_STRING", None)
 
         if query:
