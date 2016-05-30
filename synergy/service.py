@@ -240,6 +240,56 @@ class Synergy(service.Service):
         manager_name = None
         command = None
 
+        query = environ.get("QUERY_STRING", None)
+
+        if query:
+            parameters = parse_qs(query)
+            LOG.info(parameters)
+            if "manager" in parameters:
+                manager_name = escape(parameters['manager'][0])
+
+            if "command" in parameters:
+                command = escape(parameters['command'][0])
+
+            if "args" in parameters:
+                manager_args = escape(parameters['args'][0])
+                manager_args = manager_args.replace("'", "\"")
+                manager_args = json.loads(manager_args)
+            else:
+                manager_args = {}
+
+        if not query or not manager_name or not command:
+            start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
+            return ["wrong command"]
+
+        if manager_name in self.managers:
+            manager = self.managers[manager_name]
+            try:
+                result = manager.execute(command=command, **manager_args)
+
+                if not isinstance(result, dict):
+                    try:
+                        result = result.toDict()
+                    except Exception:
+                        result = result.__dict__
+
+                LOG.info("command result %s" % result)
+
+                start_response("200 OK", [("Content-Type", "text/html")])
+                return ["%s" % json.dumps(result)]
+            except Exception as ex:
+                LOG.info("executeCommand error: %s" % ex)
+                start_response("404 NOT FOUND",
+                               [("Content-Type", "text/plain")])
+                return ["error: %s" % ex]
+        else:
+            start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
+            return ["manager %r not found!" % manager_name]
+
+    def executeCommand2(self, environ, start_response):
+        manager_name = None
+        command = None
+
         synergySerializer = serializer.SynergySerializer()
         query = environ.get("QUERY_STRING", None)
         # LOG.info("QUERY_STRING %s" % query)
