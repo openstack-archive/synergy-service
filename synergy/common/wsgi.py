@@ -1,5 +1,6 @@
 import errno
 import eventlet
+import logging
 import os
 import re
 import socket
@@ -9,7 +10,6 @@ import time
 from eventlet import greenio as eventlet_greenio
 from eventlet import wsgi as eventlet_wsgi
 
-from synergy.common import log as logging
 from sys import exc_info
 from traceback import format_tb
 

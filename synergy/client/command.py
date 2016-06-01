@@ -18,42 +18,6 @@ either express or implied.
 See the License for the specific language governing
 permissions and limitations under the License."""
 
-"""
-class BaseCommand(object):
-
-    def __init__(self, name):
-        self.name = name
-        self.parameters = {}
-        self.results = {}
-
-    def getName(self):
-        return self.name
-
-    def getParameters(self):
-        return self.parameters
-
-    def addParameter(self, name, value):
-        self.parameters[name] = value
-
-    def getParameter(self, name):
-        return self.parameters.get(name, None)
-
-    def getResults(self):
-        return self.results
-
-    def addResult(self, name, value):
-        self.results[name] = value
-
-    def getResult(self, name):
-        return self.getResults().get(name, None)
-
-    def setResults(self, data):
-        self.results = data
-
-
-class HTTPCommand(BaseCommand):
-"""
-
 
 class HTTPCommand(object):
 
@@ -62,9 +26,6 @@ class HTTPCommand(object):
 
     def getName(self):
         return self.name
-
-    # def __init__(self, name):
-        # super(HTTPCommand, self).__init__(name)
 
     def configureParser(self, subparser):
         raise NotImplementedError("not implemented!")
@@ -81,23 +42,23 @@ class HTTPCommand(object):
             request.raise_for_status()
 
         self.results = request.json()
-        # self.setResults(request.json())
+
         return request
 
     def getResults(self):
         return self.results
 
 
-class LIST(HTTPCommand):
+class List(HTTPCommand):
 
     def __init__(self):
-        super(LIST, self).__init__("list")
+        super(List, self).__init__("list")
 
     def configureParser(self, subparser):
         subparser.add_parser("list", add_help=True, help="list the managers")
 
     def sendRequest(self, synergy_url, args=None):
-        super(LIST, self).sendRequest(synergy_url + "/synergy/list")
+        super(List, self).sendRequest(synergy_url + "/synergy/list")
 
     def log(self):
         results = self.getResults()
@@ -117,10 +78,10 @@ class LIST(HTTPCommand):
         print(msg)
 
 
-class START(HTTPCommand):
+class Start(HTTPCommand):
 
     def __init__(self):
-        super(START, self).__init__("start")
+        super(Start, self).__init__("start")
 
     def configureParser(self, subparser):
         parser = subparser.add_parser("start",
@@ -130,7 +91,7 @@ class START(HTTPCommand):
         parser.add_argument("manager", help="the manager to be started")
 
     def sendRequest(self, synergy_url, args):
-        super(START, self).sendRequest(synergy_url + "/synergy/start",
+        super(Start, self).sendRequest(synergy_url + "/synergy/start",
                                        {"manager": args.manager})
 
     def log(self):
@@ -164,10 +125,10 @@ class START(HTTPCommand):
         print(msg)
 
 
-class STOP(HTTPCommand):
+class Stop(HTTPCommand):
 
     def __init__(self):
-        super(STOP, self).__init__("stop")
+        super(Stop, self).__init__("stop")
 
     def configureParser(self, subparser):
         parser = subparser.add_parser("stop",
@@ -177,7 +138,7 @@ class STOP(HTTPCommand):
         parser.add_argument("manager", help="the manager to be stopped")
 
     def sendRequest(self, synergy_url, args):
-        super(STOP, self).sendRequest(synergy_url + "/synergy/stop",
+        super(Stop, self).sendRequest(synergy_url + "/synergy/stop",
                                       {"manager": args.manager})
 
     def log(self):
@@ -209,10 +170,10 @@ class STOP(HTTPCommand):
         print(msg)
 
 
-class STATUS(HTTPCommand):
+class Status(HTTPCommand):
 
     def __init__(self):
-        super(STATUS, self).__init__("status")
+        super(Status, self).__init__("status")
 
     def configureParser(self, subparser):
         parser = subparser.add_parser("status",
@@ -222,7 +183,7 @@ class STATUS(HTTPCommand):
         parser.add_argument("manager", nargs='*', help="the managers list")
 
     def sendRequest(self, synergy_url, args):
-        super(STATUS, self).sendRequest(synergy_url + "/synergy/status",
+        super(Status, self).sendRequest(synergy_url + "/synergy/status",
                                         {"manager": args.manager})
 
     def log(self):
@@ -244,15 +205,15 @@ class STATUS(HTTPCommand):
         print(msg)
 
 
-class EXECUTE(HTTPCommand):
+class Execute(HTTPCommand):
 
     def __init__(self, name):
-        super(EXECUTE, self).__init__(name)
+        super(Execute, self).__init__(name)
 
     def sendRequest(self, synergy_url, manager, command, args=None):
         payload = {"manager": manager,
                    "command": command,
                    "args": args}
 
-        super(EXECUTE, self).sendRequest(synergy_url + "/synergy/execute",
+        super(Execute, self).sendRequest(synergy_url + "/synergy/execute",
                                          payload)
