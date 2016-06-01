@@ -1,5 +1,6 @@
 import eventlet
 import json
+import logging
 import sys
 
 from cgi import escape
@@ -12,7 +13,6 @@ except ImportError:
     from oslo.config import cfg
 
 from synergy.common import config
-from synergy.common import log as logging
 from synergy.common import serializer
 from synergy.common import service
 from synergy.common import wsgi

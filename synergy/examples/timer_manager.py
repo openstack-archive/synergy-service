@@ -1,6 +1,6 @@
+import logging
 import time
 
-from synergy.common import log as logging
 from synergy.common.manager import Manager
 
 __author__ = "Lisa Zangrando"

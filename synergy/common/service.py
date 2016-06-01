@@ -1,3 +1,4 @@
+import logging
 import os
 import signal
 import sys
@@ -6,8 +7,6 @@ try:
     from oslo_config import cfg
 except ImportError:
     from oslo.config import cfg
-
-from synergy.common import log as logging
 
 
 __author__ = "Lisa Zangrando"
