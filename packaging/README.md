@@ -100,9 +100,12 @@ Packaging for CentOS
 3. Move `synergy-service/packaging/rpm/python-synergy.spec` to
    `~/rpmbuild/SPECS`.
 
-4. Create a source archive:
+4. Create a source archive (where $VERSION is the current synergy-service version):
 
-       cp -r /path/to/synergy-service ~/rpmbuild/SOURCES/python-synergy-service
-       tar cjf python-synergy-service python-synergy-service.tar.bz2
+       cd ~/rpmbuild/SOURCES
+       cp -r /path/to/synergy-service python-synergy-service-$VERSION
+       tar cjf python-synergy-service-$VERSION.tar.bz2 python-synergy-service-$VERSION
 
-5. Go in `~/rpmbuild/SPECS` and buils with `rpmbuild -ba python-synergy.spec`.
+5. Go in `~/rpmbuild/SPECS` and build with `PBR_VERSION=$VERSION rpmbuild -ba python-synergy.spec`.
+
+6. The resulting RPM can be found in `~/rpmbuild/RPMS/noarch`.
