@@ -106,7 +106,7 @@ class SynergyObject(object):
 
 class SynergySerializer(oslo_messaging.Serializer):
     def __init__(self):
-        super(oslo_messaging.Serializer, self).__init__()
+        super(SynergySerializer, self).__init__()
 
     def serialize_entity(self, context, entity):
         if not entity:

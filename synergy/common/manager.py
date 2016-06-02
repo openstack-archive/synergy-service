@@ -38,13 +38,13 @@ class Manager(Thread):
         self.managers = {}
 
     def execute(self, command, *args, **kargs):
-        pass
+        raise NotImplementedError
 
     def task(self):
-        pass
+        raise NotImplementedError
 
     def doOnEvent(self, event_type, *args, **kargs):
-        pass
+        raise NotImplementedError
 
     def getManagers(self):
         return self.managers
@@ -88,10 +88,10 @@ class Manager(Thread):
         is created.
         Child classes should override this method.
         """
-        pass
+        raise NotImplementedError
 
     def destroy(self):
-        pass
+        raise NotImplementedError
 
     def getStatus(self):
         return self.status
