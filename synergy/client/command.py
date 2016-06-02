@@ -1,3 +1,4 @@
+import json
 import requests
 
 __author__ = "Lisa Zangrando"
@@ -211,9 +212,12 @@ class Execute(HTTPCommand):
         super(Execute, self).__init__(name)
 
     def sendRequest(self, synergy_url, manager, command, args=None):
+        if args is None:
+            args = {}
+
         payload = {"manager": manager,
                    "command": command,
-                   "args": args}
+                   "args": json.dumps(args)}
 
         super(Execute, self).sendRequest(synergy_url + "/synergy/execute",
                                          payload)
