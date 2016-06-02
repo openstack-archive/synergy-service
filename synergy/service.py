@@ -13,7 +13,6 @@ except ImportError:
     from oslo.config import cfg
 
 from synergy.common import config
-from synergy.common import serializer
 from synergy.common import service
 from synergy.common import wsgi
 
@@ -242,7 +241,8 @@ class Synergy(service.Service):
 
         if query:
             parameters = parse_qs(query)
-            LOG.info(parameters)
+            LOG.debug("execute command: parameters=%s" % parameters)
+
             if "manager" in parameters:
                 manager_name = escape(parameters['manager'][0])
 
@@ -271,12 +271,12 @@ class Synergy(service.Service):
                     except Exception:
                         result = result.__dict__
 
-                LOG.info("command result %s" % result)
+                LOG.debug("execute command: result=%s" % result)
 
                 start_response("200 OK", [("Content-Type", "text/html")])
                 return ["%s" % json.dumps(result)]
             except Exception as ex:
-                LOG.info("executeCommand error: %s" % ex)
+                LOG.debug("execute command: error=%s" % ex)
                 start_response("404 NOT FOUND",
                                [("Content-Type", "text/plain")])
                 return ["error: %s" % ex]
@@ -284,7 +284,8 @@ class Synergy(service.Service):
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
             return ["manager %r not found!" % manager_name]
 
-    def executeCommand2(self, environ, start_response):
+    """
+    def executeCommand(self, environ, start_response):
         manager_name = None
         command = None
 
@@ -328,6 +329,7 @@ class Synergy(service.Service):
         else:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
             return ["manager %r not found!" % manager_name]
+    """
 
     def startManager(self, environ, start_response):
         manager_list = None
