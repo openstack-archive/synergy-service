@@ -73,7 +73,6 @@ class ManagerRPC(object):
                               % (ex))
 
                     result[name] = manager.getStatus()
-                    pass
 
         return result
 
@@ -97,7 +96,6 @@ class ManagerRPC(object):
                               % (ex))
 
                     result[name] = manager.getStatus()
-                    pass
 
         return result
 
@@ -367,7 +365,6 @@ class Synergy(service.Service):
                                   "%s" % (ex))
 
                         result[name]["message"] = "ERROR: %s" % ex
-                        pass
                 else:
                     result[name]["message"] = "WARN: already started"
 
@@ -416,7 +413,6 @@ class Synergy(service.Service):
                                   % (ex))
 
                         result[name]["message"] = "ERROR: %s" % ex
-                        pass
                 else:
                     result[name]["message"] = "WARN: already stopped"
 
