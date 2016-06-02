@@ -38,7 +38,7 @@ class Service(object):
         signal.signal(signal.SIGTERM, self.sigterm_handler)
         signal.signal(signal.SIGINT, self.sigterm_handler)
 
-    def sigterm_handler(self, signum, frame):
+    def sigterm_handler(self):
         global SIGTERM_SENT
         if not SIGTERM_SENT:
             LOG.info("Shutting down %s" % self.name)
@@ -52,13 +52,13 @@ class Service(object):
         return self.name
 
     def start(self):
-        pass
+        raise NotImplementedError
 
     def stop(self):
-        pass
+        raise NotImplementedError
 
     def wait(self):
-        pass
+        raise NotImplementedError
 
     def restart(self):
         # Reload config files and restart service
