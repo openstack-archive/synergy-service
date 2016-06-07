@@ -99,10 +99,7 @@ class Manager(Thread):
     def setStatus(self, status):
         with self.condition:
             self.status = status
-
             self.condition.notifyAll()
-            # if self.status == "RUNNING":
-            #     self.__task()
 
     def stop(self):
         if self.isAlive():
