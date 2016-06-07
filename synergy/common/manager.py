@@ -99,10 +99,7 @@ class Manager(Thread):
     def setStatus(self, status):
         with self.condition:
             self.status = status
-
             self.condition.notifyAll()
-            # if self.status == "RUNNING":
-            #     self.__task()
 
     def stop(self):
         if self.isAlive():
@@ -112,6 +109,13 @@ class Manager(Thread):
             self.join()
 
     def run(self):
+        """Periodically run the Manager task.
+
+        Note:
+        This method will be automatically called by Thread.start().
+        One should not manually call this method.
+        See https://docs.python.org/2/library/threading.html#thread-objects
+        """
         while not self.stop_event.is_set():
             try:
                 self.task()
