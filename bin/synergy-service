@@ -3,7 +3,7 @@
 
 import sys
 
-from synergy.client.shell import main
+from synergy.service import main
 
 
 if __name__ == "__main__":

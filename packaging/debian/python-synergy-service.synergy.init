@@ -19,7 +19,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="python-synergy-service"
 NAME=synergy
-DAEMON=/usr/sbin/synergy
+DAEMON=/usr/sbin/synergy-service
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
