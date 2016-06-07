@@ -79,13 +79,15 @@ cfg.CONF.register_opts(wsgi_opts, group="WSGI")
 cfg.CONF.register_opts(logger_opts, group="Logger")
 
 
-def parse_args(args=None, usage=None, default_config_files=None):
+def parseArgs(args=None, usage=None, default_config_files=None):
     cfg.CONF(args=args,
              project='synergy',
              version="1.0",
              usage=usage,
              default_config_files=default_config_files)
 
+
+def setLogger(name):
     # create a logging format
     formatter = logging.Formatter(CONF.Logger.formatter)
 
@@ -101,20 +103,11 @@ def parse_args(args=None, usage=None, default_config_files=None):
 
     handler.setFormatter(formatter)
 
-    # set root logger
-    root_logger = logging.getLogger("synergy")
+    # set logger level
+    logger = logging.getLogger(name)
+    try:
+        logger.setLevel(cfg.CONF.Logger.level)
+    except ValueError:  # wrong level, we default to INFO
+        logger.setLevel(logging.INFO)
 
-    if cfg.CONF.Logger.level == "DEBUG":
-        root_logger.setLevel(logging.DEBUG)
-    elif cfg.CONF.Logger.level == "INFO":
-        root_logger.setLevel(logging.INFO)
-    elif cfg.CONF.Logger.level == "WARNING":
-        root_logger.setLevel(logging.WARNING)
-    elif cfg.CONF.Logger.level == "ERROR":
-        root_logger.setLevel(logging.ERROR)
-    elif cfg.CONF.Logger.level == "CRITICAL":
-        root_logger.setLevel(logging.CRITICAL)
-    else:
-        root_logger.setLevel(logging.INFO)
-
-    root_logger.addHandler(handler)
+    logger.addHandler(handler)
