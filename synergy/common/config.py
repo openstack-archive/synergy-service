@@ -1,7 +1,3 @@
-import logging
-import logging.handlers
-import os
-
 try:
     from oslo_config import cfg
 except ImportError:
@@ -79,42 +75,9 @@ cfg.CONF.register_opts(wsgi_opts, group="WSGI")
 cfg.CONF.register_opts(logger_opts, group="Logger")
 
 
-def parse_args(args=None, usage=None, default_config_files=None):
+def parseArgs(args=None, usage=None, default_config_files=None):
     cfg.CONF(args=args,
              project='synergy',
              version="1.0",
              usage=usage,
              default_config_files=default_config_files)
-
-    # create a logging format
-    formatter = logging.Formatter(CONF.Logger.formatter)
-
-    log_dir = os.path.dirname(CONF.Logger.filename)
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-    # Add the log message handler to the logger
-    handler = logging.handlers.RotatingFileHandler(
-        CONF.Logger.filename,
-        maxBytes=CONF.Logger.maxBytes,
-        backupCount=CONF.Logger.backupCount)
-
-    handler.setFormatter(formatter)
-
-    # set root logger
-    root_logger = logging.getLogger("synergy")
-
-    if cfg.CONF.Logger.level == "DEBUG":
-        root_logger.setLevel(logging.DEBUG)
-    elif cfg.CONF.Logger.level == "INFO":
-        root_logger.setLevel(logging.INFO)
-    elif cfg.CONF.Logger.level == "WARNING":
-        root_logger.setLevel(logging.WARNING)
-    elif cfg.CONF.Logger.level == "ERROR":
-        root_logger.setLevel(logging.ERROR)
-    elif cfg.CONF.Logger.level == "CRITICAL":
-        root_logger.setLevel(logging.CRITICAL)
-    else:
-        root_logger.setLevel(logging.INFO)
-
-    root_logger.addHandler(handler)

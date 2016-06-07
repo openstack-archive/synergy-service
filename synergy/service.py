@@ -1,6 +1,8 @@
 import eventlet
 import json
 import logging
+import logging.handlers
+import os
 import sys
 
 from cgi import escape
@@ -37,6 +39,39 @@ permissions and limitations under the License."""
 CONF = cfg.CONF
 LOG = None
 MANAGER_ENTRY_POINT = "synergy.managers"  # used to discover Synergy managers
+
+
+def setLogger(name):
+    """Configure the given logger with Synergy logging configuration.
+
+    Note:
+    This function should only be used when entering Synergy by the main()
+    function. Otherwise you may run into issues due to logging to protected
+    files.
+    """
+    # create a logging format
+    formatter = logging.Formatter(CONF.Logger.formatter)
+
+    log_dir = os.path.dirname(CONF.Logger.filename)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    # Add the log message handler to the logger
+    handler = logging.handlers.RotatingFileHandler(
+        CONF.Logger.filename,
+        maxBytes=CONF.Logger.maxBytes,
+        backupCount=CONF.Logger.backupCount)
+
+    handler.setFormatter(formatter)
+
+    # set logger level
+    logger = logging.getLogger(name)
+    try:
+        logger.setLevel(cfg.CONF.Logger.level)
+    except ValueError:  # wrong level, we default to INFO
+        logger.setLevel(logging.INFO)
+
+    logger.addHandler(handler)
 
 
 class ManagerRPC(object):
@@ -144,21 +179,8 @@ class Synergy(service.Service):
             LOG.info("loading manager %r", entry.name)
 
             try:
-                """
-                found = False
-
-                try:
-                    CONF.get(entry.name)
-                    found = True
-                except Exception as ex:
-                    LOG.info("missing section [%s] in synergy.conf for manager"
-                             " %r: using the default values"
-                             % (entry.name, entry.name))
-                """
-
                 CONF.register_opts(config.manager_opts, group=entry.name)
 
-                # manager_conf = CONF.get(entry.name)
                 manager_class = entry.load()
 
                 manager_obj = manager_class(*args, **kwargs)
@@ -184,12 +206,15 @@ class Synergy(service.Service):
             manager.managers = self.managers
 
             try:
+                LOG.info("initializing the %r manager" % (manager.getName()))
                 manager.setup()
                 manager.setStatus("ACTIVE")
 
-                LOG.info("manager '%s' initialized!" % (manager.getName()))
+                LOG.info("manager %r initialized!" % (manager.getName()))
             except Exception as ex:
-                LOG.error("manager '%s' instantiation error: %s" % (name, ex))
+                LOG.error("Exception has occured", exc_info=1)
+
+                LOG.error("manager %r instantiation error: %s" % (name, ex))
                 self.managers[manager.getName()].setStatus("ERROR")
                 raise ex
 
@@ -451,13 +476,15 @@ def main():
         eventlet.monkey_patch(os=False)
 
         # the configuration will be into the cfg.CONF global data structure
-        config.parse_args(args=sys.argv[1:],
-                          default_config_files=["/etc/synergy/synergy.conf"])
+        config.parseArgs(args=sys.argv[1:],
+                         default_config_files=["/etc/synergy/synergy.conf"])
 
         if not cfg.CONF.config_file:
             sys.exit("ERROR: Unable to find configuration file via the "
                      "default search paths (~/.synergy/, ~/, /etc/synergy/"
                      ", /etc/) and the '--config-file' option!")
+
+        setLogger(name="synergy")
 
         global LOG
         # LOG = logging.getLogger(None)
@@ -469,6 +496,11 @@ def main():
         # os.setsid()
 
         server = Synergy()
+
+        # Configure logging for managers
+        for manager in server.managers.values():
+            setLogger(manager.__module__)
+
         server.start()
 
         LOG.info("Synergy started")
