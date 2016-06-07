@@ -113,25 +113,20 @@ def main():
         for entry in iter_entry_points(COMMANDS_ENTRY_POINT):
             command_class = entry.load()
             command = command_class()
-            # command = command_class(*args, **kwargs)
-            command.configureParser(subparser)
             commands[entry.name] = command
 
-        args = parser.parse_args(sys.argv[1:])
+        for command_name in sorted(commands.keys()):
+            commands[command_name].configureParser(subparser)
 
-        # print("args %s" % args)
+        args = parser.parse_args(sys.argv[1:])
 
         os_username = args.os_username
         os_password = args.os_password
         os_project_name = args.os_project_name
-        # os_project_id = args.os_project_id
         os_auth_token = args.os_auth_token
         os_auth_token_cache = args.os_auth_token_cache
         os_auth_url = args.os_auth_url
-        # os_auth_system = args.os_auth_system
-        # insecure = args.insecure
         bypass_url = args.bypass_url
-        # cacert = args.os_cacert
         command_name = args.command_name
 
         if not os_username:
@@ -150,21 +145,14 @@ def main():
                                             username=os_username,
                                             password=os_password,
                                             project_name=os_project_name)
-        """
-        client.authenticate()
 
-        token = client.getToken()
-
-        print("os_auth_token=%s" % os_auth_token)
-        print("os_auth_token_cache=%s" % os_auth_token_cache)
-        """
         token = None
 
         if os_auth_token:
             token = os_auth_token
         elif os_auth_token_cache:
             token = keystone_v3.Token.load(".auth_token")
-            # print("token is expired? %s" % token.isExpired())
+
             if token is None or token.isExpired():
                 client.authenticate()
                 token = client.getToken()

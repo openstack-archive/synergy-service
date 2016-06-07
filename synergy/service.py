@@ -144,25 +144,14 @@ class Synergy(service.Service):
             LOG.info("loading manager %r", entry.name)
 
             try:
-                """
-                found = False
-
-                try:
-                    CONF.get(entry.name)
-                    found = True
-                except Exception as ex:
-                    LOG.info("missing section [%s] in synergy.conf for manager"
-                             " %r: using the default values"
-                             % (entry.name, entry.name))
-                """
-
                 CONF.register_opts(config.manager_opts, group=entry.name)
 
-                # manager_conf = CONF.get(entry.name)
                 manager_class = entry.load()
 
                 manager_obj = manager_class(*args, **kwargs)
                 LOG.info("manager instance %r created!", entry.name)
+
+                config.setLogger(manager_obj.__module__)
 
                 manager_obj.setAutoStart(CONF.get(entry.name).autostart)
                 manager_obj.setRate(CONF.get(entry.name).rate)
@@ -184,12 +173,15 @@ class Synergy(service.Service):
             manager.managers = self.managers
 
             try:
+                LOG.info("initializing the %r manager" % (manager.getName()))
                 manager.setup()
                 manager.setStatus("ACTIVE")
 
-                LOG.info("manager '%s' initialized!" % (manager.getName()))
+                LOG.info("manager %r initialized!" % (manager.getName()))
             except Exception as ex:
-                LOG.error("manager '%s' instantiation error: %s" % (name, ex))
+                LOG.error("Exception has occured", exc_info=1)
+
+                LOG.error("manager %r instantiation error: %s" % (name, ex))
                 self.managers[manager.getName()].setStatus("ERROR")
                 raise ex
 
@@ -451,13 +443,15 @@ def main():
         eventlet.monkey_patch(os=False)
 
         # the configuration will be into the cfg.CONF global data structure
-        config.parse_args(args=sys.argv[1:],
-                          default_config_files=["/etc/synergy/synergy.conf"])
+        config.parseArgs(args=sys.argv[1:],
+                         default_config_files=["/etc/synergy/synergy.conf"])
 
         if not cfg.CONF.config_file:
             sys.exit("ERROR: Unable to find configuration file via the "
                      "default search paths (~/.synergy/, ~/, /etc/synergy/"
                      ", /etc/) and the '--config-file' option!")
+
+        config.setLogger(name="synergy")
 
         global LOG
         # LOG = logging.getLogger(None)
