@@ -4,6 +4,6 @@
 
 pbr
 eventlet
-oslo.config
-oslo.messaging
+oslo.config>=2.4.0,<3.0.0
+oslo.messaging>=2.5.0,<3.0.0
 python-dateutil
