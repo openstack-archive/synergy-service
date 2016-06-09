@@ -38,7 +38,9 @@ class Service(object):
         signal.signal(signal.SIGTERM, self.sigterm_handler)
         signal.signal(signal.SIGINT, self.sigterm_handler)
 
-    def sigterm_handler(self):
+    def sigterm_handler(self, signum, frame):
+        LOG.debug("Signal handler called with signal=%s" % signum)
+
         global SIGTERM_SENT
         if not SIGTERM_SENT:
             LOG.info("Shutting down %s" % self.name)

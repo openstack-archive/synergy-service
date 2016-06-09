@@ -2,8 +2,6 @@ from threading import Condition
 from threading import Event
 from threading import Thread
 
-import time
-
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
 __copyright__ = """Copyright (c) 2015 INFN - INDIGO-DataCloud
@@ -35,6 +33,7 @@ class Manager(Thread):
         self.status = "CREATED"
         self.autostart = False
         self.rate = -1
+        self.paused = True  # start out paused
         self.managers = {}
 
     def execute(self, command, *args, **kargs):
@@ -73,6 +72,7 @@ class Manager(Thread):
 
     def setAutoStart(self, autostart):
         self.autostart = autostart
+        self.paused = not self.autostart
 
     def getRate(self):
         return self.rate
@@ -99,26 +99,38 @@ class Manager(Thread):
     def setStatus(self, status):
         with self.condition:
             self.status = status
+
             self.condition.notifyAll()
 
     def stop(self):
         if self.isAlive():
             # set event to signal thread to terminate
             self.stop_event.set()
+            self.resume()
             # block calling thread until thread really has terminated
             self.join()
 
-    def run(self):
-        """Periodically run the Manager task.
+    def pause(self):
+        with self.condition:
+            self.paused = True
+            self.condition.notifyAll()
 
-        Note:
-        This method will be automatically called by Thread.start().
-        One should not manually call this method.
-        See https://docs.python.org/2/library/threading.html#thread-objects
-        """
-        while not self.stop_event.is_set():
-            try:
-                self.task()
-                time.sleep(self.rate * 60)
-            except Exception as ex:
-                print("task %r: %s" % (self.name, ex))
+    def resume(self):
+        with self.condition:
+            self.paused = False
+            self.condition.notifyAll()
+
+    def run(self):
+        while not self.stop_event.isSet():
+            with self.condition:
+                if self.paused:
+                    self.status = "ACTIVE"
+                    self.condition.wait()
+                else:
+                    self.status = "RUNNING"
+
+                    try:
+                        self.task()
+                        self.condition.wait(self.rate * 60)
+                    except Exception as ex:
+                        print("task %r: %s" % (self.name, ex))
