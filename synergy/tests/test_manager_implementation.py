@@ -87,13 +87,3 @@ class TestManagerImplementation(base.TestCase):
         self.manager.setup()
         self.manager.doOnEvent(event_type="JUMP10")
         self.assertEqual(10, self.manager._counter)
-
-    def test_run_stop(self):
-        self.manager.setup()
-        self.manager.rate = 1.0 / 60 / 1000  # to sleep only 1 ms and not 1 min
-
-        self.manager.start()
-        self.assertEqual(True, self.manager.isAlive())
-
-        self.manager.stop()
-        self.assertEqual(False, self.manager.isAlive())
