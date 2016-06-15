@@ -32,9 +32,13 @@ class TimerManager(Manager):
     def setup(self):
         LOG.info("%s setup invoked!" % (self.name))
 
-    def execute(self, cmd):
-        LOG.info("%s execute invoked!" % (self.name))
-        LOG.info("command name=%s" % (cmd.getName()))
+    def execute(self, command, *args, **kargs):
+        LOG.info("%r execute %r invoked!" % (self.name, command))
+
+        if command == "GET_TIME":
+            return {"localtime": time.asctime(time.localtime(time.time()))}
+        else:
+            raise Exception("command %r not supported" % command)
 
     def destroy(self):
         LOG.info("%s destroy invoked!" % (self.name))
