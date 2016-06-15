@@ -111,7 +111,6 @@ class Synergy(service.Service):
 
                 LOG.error("manager %r instantiation error: %s"
                           % (entry.name, ex))
-                self.managers[manager_obj.getName()].setStatus("ERROR")
 
                 raise Exception("manager %r instantiation error: %s"
                                 % (entry.name, ex))
