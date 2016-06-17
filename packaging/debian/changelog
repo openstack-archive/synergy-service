@@ -1,3 +1,9 @@
+python-synergy-service (1.0.0-1ubuntu1) unstable; urgency=low
+
+  * First public release. Full set of funtionalities.
+
+ -- Vincent Llorens <vincent.llorens@cc.in2p3.fr>  Fri, 17 Jun 2016 14:36:31 +0200
+
 python-synergy-service (0.2-1) unstable; urgency=low
 
   * Working release with minimum set of functionalities

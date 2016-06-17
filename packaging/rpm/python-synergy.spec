@@ -1,8 +1,8 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          0.2
-Release:          2%{?dist}
+Version:          1.0.0
+Release:          1%{?dist}
 Summary:          Synergy service
 
 License:          ASL 2.0
@@ -93,6 +93,9 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Fri Jun 17 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 1.0.0-1
+- First public release of Synergy. Full set of functionalities.
+
 * Fri Apr 29 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 0.2-2
 - Working release with minimum set of functionalities
 
