@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          1.0.0
+Version:          1.0.1
 Release:          1%{?dist}
 Summary:          Synergy service
 
@@ -93,6 +93,9 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Tue Jul 26 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr - 1.0.1-1
+- Fix broken links in README
+
 * Fri Jun 17 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 1.0.0-1
 - First public release of Synergy. Full set of functionalities.
 

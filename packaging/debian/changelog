@@ -1,3 +1,9 @@
+python-synergy-service (1.0.1) unstable; urgency=low
+
+  * Fix broken links in README
+
+ -- Vincent Llorens <vincent.llorens@cc.in2p3.fr>  Tue, 26 Jul 2016 11:05:37 +0020
+
 python-synergy-service (1.0.0-1ubuntu1) unstable; urgency=low
 
   * First public release. Full set of funtionalities.
