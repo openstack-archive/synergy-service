@@ -27,6 +27,7 @@ class TestManager(base.TestCase):
     def setUp(self):
         super(TestManager, self).setUp()
         self.manager = Manager(name="dummy_manager")
+        self.manager.setAutoStart(False)
 
     def test_get_name(self):
         self.assertEqual("dummy_manager", self.manager.getName())

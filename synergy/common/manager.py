@@ -1,6 +1,8 @@
+from serializer import SynergyObject
 from threading import Condition
 from threading import Event
 from threading import Thread
+
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
@@ -21,18 +23,17 @@ See the License for the specific language governing
 permissions and limitations under the License."""
 
 
-class Manager(Thread):
+class Manager(SynergyObject, Thread):
 
-    def __init__(self, name):
+    def __init__(self, name=None):
         super(Manager, self).__init__()
-        self.setDaemon(True)
-        self.stop_event = Event()
-        self.config_opts = []
         self.condition = Condition()
-        self.name = name
-        self.status = "CREATED"
-        self.autostart = False
-        self.rate = -1
+        self.stop_event = Event()
+        self.setDaemon(True)
+        self.setName(name)
+        self.setStatus("CREATED")
+        self.setRate(-1)
+        self.config_opts = []
         self.paused = True  # start out paused
         self.managers = {}
 
@@ -61,24 +62,30 @@ class Manager(Thread):
                 if manager.getName() != manager_name:
                     manager.doOnEvent(event_type, *args, **kargs)
 
-    def getName(self):
-        return self.name
-
     def getOptions(self):
         return self.config_opts
 
+    def getStatus(self):
+        return self.get("status")
+
+    def setStatus(self, status):
+        with self.condition:
+            self.set("status", status)
+
+            self.condition.notifyAll()
+
     def isAutoStart(self):
-        return self.autostart
+        return self.get("autostart")
 
     def setAutoStart(self, autostart):
-        self.autostart = autostart
-        self.paused = not self.autostart
+        self.set("autostart", autostart)
+        self.paused = not autostart
 
     def getRate(self):
-        return self.rate
+        return self.get("rate")
 
     def setRate(self, rate):
-        self.rate = rate
+        self.set("rate", rate)
 
     def setup(self):
         """Manager initialization
@@ -92,15 +99,6 @@ class Manager(Thread):
 
     def destroy(self):
         raise NotImplementedError
-
-    def getStatus(self):
-        return self.status
-
-    def setStatus(self, status):
-        with self.condition:
-            self.status = status
-
-            self.condition.notifyAll()
 
     def stop(self):
         if self.isAlive():
@@ -124,13 +122,13 @@ class Manager(Thread):
         while not self.stop_event.isSet():
             with self.condition:
                 if self.paused:
-                    self.status = "ACTIVE"
+                    self.setStatus("ACTIVE")
                     self.condition.wait()
                 else:
-                    self.status = "RUNNING"
+                    self.setStatus("RUNNING")
 
                     try:
                         self.task()
-                        self.condition.wait(self.rate * 60)
+                        self.condition.wait(self.getRate() * 60)
                     except Exception as ex:
-                        print("task %r: %s" % (self.name, ex))
+                        print("task %r: %s" % (self.getName(), ex))

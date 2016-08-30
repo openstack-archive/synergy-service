@@ -15,3 +15,4 @@ eventlet
 oslo.config>=2.4.0,<3.0.0
 oslo.messaging>=2.5.0,<3.0.0
 python-dateutil
+tabulate>=0.7.2,<0.8.0

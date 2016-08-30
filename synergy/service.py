@@ -15,8 +15,11 @@ except ImportError:
     from oslo.config import cfg
 
 from synergy.common import config
-from synergy.common import service
-from synergy.common import wsgi
+from synergy.common.manager import Manager
+from synergy.common.serializer import SynergyEncoder
+from synergy.common.service import Service
+from synergy.common.wsgi import Server
+
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
@@ -76,7 +79,7 @@ def setLogger(name):
     logger.addHandler(handler)
 
 
-class Synergy(service.Service):
+class Synergy(Service):
     """Service object for binaries running on hosts.
 
     A service takes a manager and enables rpc by listening to queues based
@@ -98,8 +101,7 @@ class Synergy(service.Service):
                 manager_class = entry.load()
 
                 manager_obj = manager_class(*args, **kwargs)
-                LOG.info("manager instance %r created!", entry.name)
-
+                manager_obj.setName(entry.name)
                 manager_obj.setAutoStart(CONF.get(entry.name).autostart)
                 manager_obj.setRate(CONF.get(entry.name).rate)
 
@@ -137,14 +139,18 @@ class Synergy(service.Service):
         result = []
 
         for name, manager in self.managers.items():
-            result.append(name)
+            m = Manager(name)
+            m.setStatus(manager.getStatus())
+            m.setRate(manager.getRate())
+
+            result.append(m)
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return ["%s" % json.dumps(result)]
+        return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
     def getManagerStatus(self, environ, start_response):
         manager_list = None
-        result = {}
+        result = []
 
         query = environ.get("QUERY_STRING", None)
 
@@ -165,14 +171,20 @@ class Synergy(service.Service):
             manager_name = escape(manager_name)
 
             if manager_name in self.managers:
-                result[manager_name] = self.managers[manager_name].getStatus()
+                manager = self.managers[manager_name]
+
+                m = Manager(manager_name)
+                m.setStatus(manager.getStatus())
+                m.setRate(manager.getRate())
+
+                result.append(m)
 
         if len(manager_list) == 1 and len(result) == 0:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
             return ["manager %r not found!" % manager_list[0]]
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return ["%s" % json.dumps(result)]
+        return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
     def executeCommand(self, environ, start_response):
         manager_name = None
@@ -215,16 +227,8 @@ class Synergy(service.Service):
         try:
             result = manager.execute(command=command, **manager_args)
 
-            if not isinstance(result, dict):
-                try:
-                    result = result.toDict()
-                except Exception:
-                    result = result.__dict__
-
-            LOG.debug("execute command: result=%s" % result)
-
             start_response("200 OK", [("Content-Type", "text/html")])
-            return ["%s" % json.dumps(result)]
+            return ["%s" % json.dumps(result, cls=SynergyEncoder)]
         except Exception as ex:
             LOG.debug("execute command: error=%s" % ex)
             start_response("500 INTERNAL SERVER ERROR",
@@ -233,7 +237,7 @@ class Synergy(service.Service):
 
     def startManager(self, environ, start_response):
         manager_list = None
-        result = {}
+        result = []
 
         query = environ.get("QUERY_STRING", None)
 
@@ -258,9 +262,11 @@ class Synergy(service.Service):
             if manager_name not in self.managers:
                 continue
 
-            result[manager_name] = {}
-
             manager = self.managers[manager_name]
+            m = Manager(manager_name)
+            m.setRate(manager.getRate())
+
+            result.append(m)
 
             if manager.getStatus() == "ACTIVE":
                 LOG.info("starting the %r manager" % (manager_name))
@@ -270,25 +276,25 @@ class Synergy(service.Service):
                 LOG.info("%r manager started! (rate=%s min)"
                          % (manager_name, manager.getRate()))
 
-                result[manager_name]["status"] = "RUNNING"
-                result[manager_name]["message"] = "started successfully"
+                m.setStatus("RUNNING")
+                m.set("message", "started successfully")
             elif manager.getStatus() == "RUNNING":
-                result[manager_name]["status"] = "RUNNING"
-                result[manager_name]["message"] = "WARN: already started"
+                m.setStatus("RUNNING")
+                m.set("message", "WARN: already started")
             elif manager.getStatus() == "ERROR":
-                result[manager_name]["status"] = "ERROR"
-                result[manager_name]["message"] = "wrong state"
+                m.setStatus("ERROR")
+                m.set("message", "wrong state")
 
         if len(manager_list) == 1 and len(result) == 0:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
             return ["manager %r not found!" % manager_list[0]]
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return ["%s" % json.dumps(result)]
+        return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
     def stopManager(self, environ, start_response):
         manager_list = None
-        result = {}
+        result = []
 
         query = environ.get("QUERY_STRING", None)
 
@@ -313,9 +319,12 @@ class Synergy(service.Service):
             if manager_name not in self.managers:
                 continue
 
-            result[manager_name] = {}
-
             manager = self.managers[manager_name]
+
+            m = Manager(manager_name)
+            m.setRate(manager.getRate())
+
+            result.append(m)
 
             if manager.getStatus() == "RUNNING":
                 LOG.info("stopping the %r manager" % (manager_name))
@@ -324,21 +333,21 @@ class Synergy(service.Service):
 
                 LOG.info("%r manager stopped!" % (manager_name))
 
-                result[manager_name]["status"] = "ACTIVE"
-                result[manager_name]["message"] = "stopped successfully"
+                m.setStatus("ACTIVE")
+                m.set("message", "stopped successfully")
             elif manager.getStatus() == "ACTIVE":
-                result[manager_name]["status"] = "ACTIVE"
-                result[manager_name]["message"] = "WARN: already stopped"
+                m.setStatus("ACTIVE")
+                m.set("message", "WARN: already stopped")
             elif manager.getStatus() == "ERROR":
-                result[manager_name]["status"] = "ERROR"
-                result[manager_name]["message"] = "wrong state"
+                m.setStatus("ERROR")
+                m.set("message", "wrong state")
 
         if len(manager_list) == 1 and len(result) == 0:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
             return ["manager %r not found!" % manager_list[0]]
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return ["%s" % json.dumps(result)]
+        return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
     def start(self):
         self.model_disconnected = False
@@ -357,7 +366,7 @@ class Synergy(service.Service):
                     manager.setStatus("ERROR")
                     raise ex
 
-        self.wsgi_server = wsgi.Server(
+        self.wsgi_server = Server(
             name="WSGI server",
             host_name=CONF.WSGI.host,
             host_port=CONF.WSGI.port,
