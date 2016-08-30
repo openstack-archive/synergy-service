@@ -175,8 +175,8 @@ def main():
         if command_name not in commands:
             print("command %r not found!" % command_name)
 
-        commands[command_name].sendRequest(synergy_url, args)
-        commands[command_name].log()
+        commands[command_name].execute(synergy_url, args)
+        # commands[command_name].log()
     except KeyboardInterrupt as e:
         print("Shutting down synergyclient")
         sys.exit(1)

@@ -1,6 +1,10 @@
 import json
 import requests
 
+from synergy.common import utils
+from tabulate import tabulate
+
+
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
 __copyright__ = """Copyright (c) 2015 INFN - INDIGO-DataCloud
@@ -31,10 +35,21 @@ class HTTPCommand(object):
     def configureParser(self, subparser):
         raise NotImplementedError("not implemented!")
 
-    def log(self):
-        raise NotImplementedError("not implemented!")
+    def objectHookHandler(self, parsed_dict):
+        if "synergy_object" in parsed_dict:
+            synergy_object = parsed_dict["synergy_object"]
+            try:
+                objClass = utils.import_class(synergy_object["name"])
 
-    def sendRequest(self, synergy_url, payload=None):
+                objInstance = objClass()
+                return objInstance.deserialize(parsed_dict)
+            except Exception as ex:
+                print(ex)
+                raise ex
+        else:
+            return parsed_dict
+
+    def execute(self, synergy_url, payload=None):
         request = requests.get(synergy_url, params=payload)
 
         if request.status_code != requests.codes.ok:
@@ -44,180 +59,98 @@ class HTTPCommand(object):
 
         self.results = request.json()
 
-        return request
+        try:
+            return json.loads(request.text, object_hook=self.objectHookHandler)
+        except Exception:
+            return request.json()
 
     def getResults(self):
         return self.results
 
 
-class List(HTTPCommand):
+class ManagerCommand(HTTPCommand):
 
     def __init__(self):
-        super(List, self).__init__("list")
+        super(ManagerCommand, self).__init__("Manager")
 
     def configureParser(self, subparser):
-        subparser.add_parser("list", add_help=True, help="list the managers")
+        manager_parser = subparser.add_parser('manager')
+        manager_parsers = manager_parser.add_subparsers(dest="command")
 
-    def sendRequest(self, synergy_url, args=None):
-        super(List, self).sendRequest(synergy_url + "/synergy/list")
+        manager_parsers.add_parser(
+            "list", add_help=True, help="list the managers")
 
-    def log(self):
-        results = self.getResults()
+        status_parser = manager_parsers.add_parser(
+            "status", add_help=True, help="show the managers status")
 
-        max_project_id = max(len(max(results, key=len)), len("manager"))
-        separator_str = "-" * (max_project_id + 4) + "\n"
-        format_str = "| {0:%ss} |\n" % (max_project_id)
+        status_parser.add_argument(
+            "manager", nargs='*', help="the managers list")
 
-        msg = separator_str
-        msg += format_str.format("manager")
-        msg += separator_str
+        start_parser = manager_parsers.add_parser(
+            "start", add_help=True, help="start the manager")
 
-        for manager in results:
-            msg += format_str.format(manager)
+        start_parser.add_argument(
+            "manager", nargs='+', help="the managers list")
 
-        msg += separator_str
-        print(msg)
+        stop_parser = manager_parsers.add_parser(
+            "stop", add_help=True, help="stop the manager")
 
+        stop_parser.add_argument(
+            "manager", nargs='+', help="the managers list")
 
-class Start(HTTPCommand):
+    def execute(self, synergy_url, args=None):
+        table = []
+        headers = []
+        url = synergy_url
 
-    def __init__(self):
-        super(Start, self).__init__("start")
+        if args.command == "list":
+            headers.append("manager")
+            url += "/synergy/list"
 
-    def configureParser(self, subparser):
-        parser = subparser.add_parser("start",
-                                      add_help=True,
-                                      help="start the managers")
+            managers = super(ManagerCommand, self).execute(url)
 
-        parser.add_argument("manager", help="the manager to be started")
+            for manager in managers:
+                table.append([manager.getName()])
+        else:
+            headers.append("manager")
+            headers.append("status")
+            headers.append("rate (min)")
+            url += "/synergy/" + args.command
 
-    def sendRequest(self, synergy_url, args):
-        super(Start, self).sendRequest(synergy_url + "/synergy/start",
-                                       {"manager": args.manager})
+            managers = super(ManagerCommand, self).execute(
+                url, {"manager": args.manager})
 
-    def log(self):
-        results = self.getResults()
+            if args.command == "status":
+                for manager in managers:
+                    table.append([manager.getName(),
+                                  manager.getStatus(),
+                                  manager.getRate()])
+            else:
+                headers.append("details")
 
-        max_manager = max(len(max(results.keys(), key=len)), len("manager"))
+                for manager in managers:
+                    msg = manager.get("message")
 
-        max_status = len("status")
-        max_msg = len("message")
+                    table.append([manager.getName(),
+                                  manager.getStatus() + " (%s)" % msg,
+                                  manager.getRate()])
 
-        for result in results.values():
-            max_status = max(len(str(result["status"])), max_status)
-            max_msg = max(len(str(result["message"])), max_msg)
-
-        separator_str = "-" * (max_manager + max_status + max_msg + 10) + "\n"
-
-        format_str = "| {0:%ss} | {1:%ss} | {2:%ss} |\n" % (max_manager,
-                                                            max_status,
-                                                            max_msg)
-
-        msg = separator_str
-        msg += format_str.format("manager", "status", "message")
-        msg += separator_str
-
-        for manager, values in results.items():
-            msg += format_str.format(manager,
-                                     values["status"],
-                                     values["message"])
-
-        msg += separator_str
-        print(msg)
+        print(tabulate(table, headers, tablefmt="fancy_grid"))
 
 
-class Stop(HTTPCommand):
-
-    def __init__(self):
-        super(Stop, self).__init__("stop")
-
-    def configureParser(self, subparser):
-        parser = subparser.add_parser("stop",
-                                      add_help=True,
-                                      help="stop the managers")
-
-        parser.add_argument("manager", help="the manager to be stopped")
-
-    def sendRequest(self, synergy_url, args):
-        super(Stop, self).sendRequest(synergy_url + "/synergy/stop",
-                                      {"manager": args.manager})
-
-    def log(self):
-        results = self.getResults()
-
-        max_manager = max(len(max(results.keys(), key=len)), len("manager"))
-        max_status = len("status")
-        max_msg = len("message")
-
-        for result in results.values():
-            max_status = max(len(str(result["status"])), max_status)
-            max_msg = max(len(str(result["message"])), max_msg)
-
-        separator_str = "-" * (max_manager + max_status + max_msg + 10) + "\n"
-        format_str = "| {0:%ss} | {1:%ss} | {2:%ss} |\n" % (max_manager,
-                                                            max_status,
-                                                            max_msg)
-
-        msg = separator_str
-        msg += format_str.format("manager", "status", "message")
-        msg += separator_str
-
-        for manager, values in results.items():
-            msg += format_str.format(manager,
-                                     values["status"],
-                                     values["message"])
-
-        msg += separator_str
-        print(msg)
-
-
-class Status(HTTPCommand):
-
-    def __init__(self):
-        super(Status, self).__init__("status")
-
-    def configureParser(self, subparser):
-        parser = subparser.add_parser("status",
-                                      add_help=True,
-                                      help="retrieve the manager's status")
-
-        parser.add_argument("manager", nargs='*', help="the managers list")
-
-    def sendRequest(self, synergy_url, args):
-        super(Status, self).sendRequest(synergy_url + "/synergy/status",
-                                        {"manager": args.manager})
-
-    def log(self):
-        results = self.getResults()
-
-        max_project_id = max(len(max(results.keys(), key=len)), len("manager"))
-        max_value = max(len(max(results.values(), key=len)), len("status"))
-        separator_str = "-" * (max_project_id + max_value + 7) + "\n"
-        format_str = "| {0:%ss} | {1:%ss} |\n" % (max_project_id, max_value)
-
-        msg = separator_str
-        msg += format_str.format("manager", "status")
-        msg += separator_str
-
-        for manager, status in results.items():
-            msg += format_str.format(manager, status)
-
-        msg += separator_str
-        print(msg)
-
-
-class Execute(HTTPCommand):
+class ExecuteCommand(HTTPCommand):
 
     def __init__(self, name):
-        super(Execute, self).__init__(name)
+        super(ExecuteCommand, self).__init__(name)
 
-    def sendRequest(self, synergy_url, manager, command, args=None):
+    def execute(self, synergy_url, manager, command, args=None):
         if args is None:
             args = {}
+
+        url = synergy_url + "/synergy/execute"
 
         payload = {"manager": manager,
                    "command": command,
                    "args": json.dumps(args)}
 
-        super(Execute, self).sendRequest(synergy_url + "/synergy/execute",
-                                         payload)
+        return super(ExecuteCommand, self).execute(url, payload)
