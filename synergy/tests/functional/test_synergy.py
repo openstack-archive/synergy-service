@@ -23,7 +23,7 @@ import sys
 import time
 
 from mock import Mock
-from synergy.common import utils
+from synergy.common.utils import objectHookHandler
 from synergy.service import Synergy
 
 logging.basicConfig(level=logging.DEBUG)
@@ -46,21 +46,6 @@ def getLogger(name):
     logger.addHandler(ch)
 
     return logger
-
-
-def objectHookHandler(parsed_dict):
-    if "synergy_object" in parsed_dict:
-        synergy_object = parsed_dict["synergy_object"]
-        try:
-            objClass = utils.import_class(synergy_object["name"])
-
-            objInstance = objClass()
-            return objInstance.deserialize(parsed_dict)
-        except Exception as ex:
-            print(ex)
-            raise ex
-    else:
-        return parsed_dict
 
 
 class SynergyTests(unittest.TestCase):

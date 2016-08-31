@@ -1,7 +1,7 @@
 import json
 import requests
 
-from synergy.common import utils
+from synergy.common.utils import objectHookHandler
 from tabulate import tabulate
 
 
@@ -35,32 +35,16 @@ class HTTPCommand(object):
     def configureParser(self, subparser):
         raise NotImplementedError("not implemented!")
 
-    def objectHookHandler(self, parsed_dict):
-        if "synergy_object" in parsed_dict:
-            synergy_object = parsed_dict["synergy_object"]
-            try:
-                objClass = utils.import_class(synergy_object["name"])
-
-                objInstance = objClass()
-                return objInstance.deserialize(parsed_dict)
-            except Exception as ex:
-                print(ex)
-                raise ex
-        else:
-            return parsed_dict
-
     def execute(self, synergy_url, payload=None):
         request = requests.get(synergy_url, params=payload)
 
         if request.status_code != requests.codes.ok:
-            # print(request.reason)
-            # print(request.status_code)
             request.raise_for_status()
 
         self.results = request.json()
 
         try:
-            return json.loads(request.text, object_hook=self.objectHookHandler)
+            return json.loads(request.text, object_hook=objectHookHandler)
         except Exception:
             return request.json()
 

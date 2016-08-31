@@ -92,11 +92,9 @@ class SynergyObject(object):
 
         try:
             objName = synergy_object["name"]
-            # objVer = synergy_object['version']
             objClass = utils.import_class(objName)
             objInstance = objClass()
         except Exception as ex:
-            print(ex)
             raise Exception("error on deserializing the object %r: %s"
                             % (objName, ex))
 

@@ -31,3 +31,16 @@ def import_class(import_str):
         raise ImportError(
             'Class %s cannot be found (%s)' %
             (class_str, traceback.format_exception(*sys.exc_info())))
+
+
+def objectHookHandler(parsed_dict):
+    if "synergy_object" in parsed_dict:
+        synergy_object = parsed_dict["synergy_object"]
+        try:
+            objClass = import_class(synergy_object["name"])
+            objInstance = objClass()
+            return objInstance.deserialize(parsed_dict)
+        except Exception as ex:
+            raise ex
+    else:
+        return parsed_dict
