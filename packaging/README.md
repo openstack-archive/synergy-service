@@ -31,17 +31,13 @@ inside the synergy-service directory.
 
       docker build -t synergy-centos7-builder .
 
-- edit the file `synergy-service/packaging/docker/build_env.sh` to define environment variables.
-
 - launch the container
 
       docker run -i -v /path/to/synergy-service:/tmp/synergy-service \
-                 --env-file=/path/to/synergy-service/packaging/docker/build_env.sh \
                  synergy-centos7-builder
 
   This actually mount the synergy-service directory to `/tmp/synergy-service` on
   the guest.
-  It also loads environment variables from the `build_env.sh` file.
 
 - the resulting rpm should be in the build directory if successful
 
@@ -56,12 +52,10 @@ inside the synergy-service directory.
 
       docker build -t synergy-ubuntu14.04-builder .
 
-- edit the file `synergy-service/packaging/docker/build_env.sh` to define environment variables.
 
 - launch the container
 
       docker run -i -v /path/to/synergy-service:/tmp/synergy-service \
-                 --env-file=/path/to/synergy-service/packaging/docker/build_env.sh \
                  synergy-ubuntu14.04-builder
 
 - the resulting deb should be in the build directory if successful
