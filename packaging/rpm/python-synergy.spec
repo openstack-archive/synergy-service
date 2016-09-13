@@ -17,11 +17,10 @@ Requires(pre):    shadow-utils
 Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
-Requires:         python-eventlet
-Requires:         python-oslo-config
-Requires:         python-oslo-messaging
-Requires:         python-oslo-log
-Requires:         python-dateutil
+Requires:         python-eventlet >= 0.17
+Requires:         python2-oslo-config >= 2.4
+Requires:         python-pbr >= 1.8
+Requires:         python-dateutil >= 2.4
 
 
 %description
@@ -87,9 +86,8 @@ exit 0
 %postun
 %systemd_postun_with_restart synergy.service
 if [ "$1" = 0 ]; then
-    userdel -r synergy
-    groupdel synergy
-    true
+    userdel -r synergy || true
+    groupdel synergy || true
 fi
 
 %changelog
