@@ -1,3 +1,7 @@
+import base64
+import binascii
+import ConfigParser
+import io
 import sys
 import traceback
 
@@ -44,3 +48,23 @@ def objectHookHandler(parsed_dict):
             raise ex
     else:
         return parsed_dict
+
+
+def encodeBase64(s):
+    try:
+        return base64.encodestring(s)
+    except binascii.Error:
+        raise binascii.Error
+
+
+def decodeBase64(s):
+    try:
+        return base64.decodestring(s)
+    except binascii.Error:
+        raise binascii.Error
+
+
+def getConfigParameter(data, key, section="DEFAULT"):
+    config = ConfigParser.RawConfigParser(allow_no_value=True)
+    config.readfp(io.BytesIO(data))
+    return config.get(section, key)
