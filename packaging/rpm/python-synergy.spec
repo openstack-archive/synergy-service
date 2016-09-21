@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          1.0.1
+Version:          1.1.0
 Release:          1%{?dist}
 Summary:          Synergy service
 
@@ -91,6 +91,11 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Wed Sep 21 2016 Ervin Konomi <ervin.konomi@pd.infn.it - 1.1.0-1
+- Improve Synergy serialization capabilities
+- Streamline the packaging process
+- Use dependency pinning for both CentOS and Ubuntu packaging
+
 * Tue Jul 26 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr - 1.0.1-1
 - Fix broken links in README
 

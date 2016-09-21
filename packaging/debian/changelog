@@ -1,3 +1,11 @@
+python-synergy-service (1.1.0) unstable; urgency=low
+
+  * Improve Synergy serialization capabilities
+  * Streamline the packaging process
+  * Use dependency pinning for both CentOS and Ubuntu packaging
+
+ -- Ervin Konomi <ervin.konomi@pd.infn.it>  Wed, 21 Sep 2016 11:11:02 +0200
+
 python-synergy-service (1.0.1) unstable; urgency=low
 
   * Fix broken links in README
