@@ -1,3 +1,9 @@
+python-synergy-service (1.0.2) unstable; urgency=low
+
+  * Trial release
+
+ -- Ervin Konomi <ervin.konomi@pd.infn.it>  Wed Sep 21 11:11:02 2016 +0200
+
 python-synergy-service (1.0.1) unstable; urgency=low
 
   * Fix broken links in README
