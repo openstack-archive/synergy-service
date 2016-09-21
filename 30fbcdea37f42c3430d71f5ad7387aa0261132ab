@@ -1,0 +1,8 @@
+Code-Review+2: Ervin <ervin.konomi@pd.infn.it>
+Workflow+1: Ervin <ervin.konomi@pd.infn.it>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 21 Sep 2016 08:21:32 +0000
+Reviewed-on: https://review.openstack.org/373420
+Project: openstack/synergy-service
+Branch: refs/heads/master
