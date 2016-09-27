@@ -17,7 +17,7 @@ Requires(pre):    shadow-utils
 Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
-Requires:         python-eventlet >= 0.17
+Requires:         python2-eventlet >= 0.18
 Requires:         python2-oslo-config >= 2.4
 Requires:         python-pbr >= 1.8
 Requires:         python-dateutil >= 2.4
