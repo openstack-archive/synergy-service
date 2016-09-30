@@ -105,6 +105,9 @@ class Synergy(Service):
                 manager_obj.setAutoStart(CONF.get(entry.name).autostart)
                 manager_obj.setRate(CONF.get(entry.name).rate)
 
+                # Configure logging for manager
+                setLogger(manager_obj.__module__)
+
                 self.managers[manager_obj.getName()] = manager_obj
 
                 CONF.register_opts(manager_obj.getOptions(), group=entry.name)
@@ -442,11 +445,6 @@ def main():
         # os.setsid()
 
         server = Synergy()
-
-        # Configure logging for managers
-        for manager in server.managers.values():
-            setLogger(manager.__module__)
-
         server.start()
 
         LOG.info("Synergy started")
