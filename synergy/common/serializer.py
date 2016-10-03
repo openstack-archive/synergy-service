@@ -160,5 +160,7 @@ class SynergyEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, SynergyObject):
             return obj.serialize()
+        elif isinstance(obj, datetime.datetime):
+            return obj.isoformat()
         else:
             return JSONEncoder.default(self, obj)
