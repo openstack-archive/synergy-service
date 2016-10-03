@@ -91,6 +91,7 @@ class Synergy(Service):
         super(Synergy, self).__init__("Synergy")
 
         self.managers = {}
+        self.wsgi_server = None
 
         for entry in iter_entry_points(MANAGER_ENTRY_POINT):
             LOG.info("loading manager %r", entry.name)
