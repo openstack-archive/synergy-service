@@ -1,6 +1,8 @@
 import sys
 import traceback
 
+from datetime import datetime
+
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
 __copyright__ = """Copyright (c) 2015 INFN - INDIGO-DataCloud
@@ -33,14 +35,24 @@ def import_class(import_str):
             (class_str, traceback.format_exception(*sys.exc_info())))
 
 
-def objectHookHandler(parsed_dict):
-    if "synergy_object" in parsed_dict:
-        synergy_object = parsed_dict["synergy_object"]
+def objectHookHandler(json_dict):
+    for key, value in json_dict.items():
+        if isinstance(value, dict):
+            json_dict[key] = objectHookHandler(value)
+        else:
+            try:
+                json_dict[key] = datetime.strptime(value,
+                                                   "%Y-%m-%dT%H:%M:%S.%f")
+            except Exception as ex:
+                pass
+
+    if "synergy_object" in json_dict:
+        synergy_object = json_dict["synergy_object"]
         try:
             objClass = import_class(synergy_object["name"])
             objInstance = objClass()
-            return objInstance.deserialize(parsed_dict)
+            return objInstance.deserialize(json_dict)
         except Exception as ex:
             raise ex
     else:
-        return parsed_dict
+        return json_dict
