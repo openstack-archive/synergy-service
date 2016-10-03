@@ -1,7 +1,6 @@
-import datetime
+from datetime import datetime
 from json import JSONEncoder
 from synergy.common import utils
-
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
@@ -100,6 +99,8 @@ class SynergyObject(object):
 
         del entity["synergy_object"]
 
+        entity = utils.objectHookHandler(entity)
+
         for key, value in entity.items():
             if isinstance(value, dict):
                 if "synergy_object" in value:
@@ -148,7 +149,7 @@ class SynergyObject(object):
                         result[key].append(item.serialize())
                     else:
                         result[key].append(item)
-            elif isinstance(value, datetime.datetime):
+            elif isinstance(value, datetime):
                 result[key] = value.isoformat()
             else:
                 result[key] = value
@@ -160,5 +161,7 @@ class SynergyEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, SynergyObject):
             return obj.serialize()
+        elif isinstance(obj, datetime):
+            return obj.isoformat()
         else:
             return JSONEncoder.default(self, obj)
