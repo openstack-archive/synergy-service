@@ -86,8 +86,8 @@ exit 0
 %postun
 %systemd_postun_with_restart synergy.service
 if [ "$1" = 0 ]; then
-    userdel -r synergy || true
-    groupdel synergy || true
+    userdel -r synergy 2> /dev/null || true
+    groupdel synergy 2> /dev/null || true
 fi
 
 %changelog
