@@ -1,0 +1,57 @@
+CHANGES
+=======
+
+* use pbr fully and use postversioning
+* RPM: don't output errors on uninstallation
+* Fix conf for AMQP virtual host
+* Added unit tests
+* Fixed destroy() method
+* Fixed serializer
+* Fixed logging for managers
+* fix eventlet and dateutil required versions
+* Fix requirement version pinning
+
+1.1.0
+-----
+
+* Release v1.1.0
+* setup.cfg mod
+* setup.cfg updated
+* Use dependency pinning
+* Streamline packaging with docker
+* Commit for fixes described in https://review.openstack.org/#/c/362762/
+* Synergy enhancements
+* Cleanup tox.ini: Remove obsolete constraints
+
+1.0.1
+-----
+
+* Bump version to 1.0.1
+* Fix broken link to doc in README
+
+1.0.0
+-----
+
+* bump to version 1.0.0
+* first functional test added
+* :added pause() and resume() methods to the Manager class
+* add unit tests on the Manager class
+* logging fixed and synergy shell updated
+* update oslo libs required versions
+* add synergy CLI to bin/
+* fixed command.Execute() and changed the logging level of service.executeCommand()
+* small code cleanup w/o affecting functionalities
+* fix logging
+* fix CentOS packaging documentation
+* update synergy configuration file
+* add synergy CLI
+* manager fixed
+
+0.2
+---
+
+* bump version & changelog for release v0.2
+* freeze the OpenStack version for CentOS
+* fix code that prevented the package from running
+* import project from launchpad git repo
+* Added .gitreview

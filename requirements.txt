@@ -2,7 +2,7 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
-pbr>=1.8,<1.9
+pbr>=1.10,<1.11
 
 eventlet>=0.17,<0.19
 oslo.config>=2.4,<2.5
