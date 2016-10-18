@@ -69,6 +69,13 @@ install -d -m0755                           %{buildroot}%{_localstatedir}/lock/s
 
 
 %pre
+# Prevent installation if the tabulate package is not present on the system.
+# This is needed because tabulate is not available as a system package.
+python -c "import tabulate" 2> /dev/null \
+    || (echo 'The tabulate package needs to be installed manually' \
+       'before installing Synergy (e.g. "pip install tabulate").' >&2 \
+    && exit 1)
+
 getent group synergy > /dev/null || groupadd -r synergy
 getent passwd synergy > /dev/null || \
     useradd -r -g synergy -s /sbin/nologin synergy
