@@ -14,7 +14,15 @@ set -e
 # the debian-policy package
 
 case "$1" in
-    install|upgrade)
+    install)
+        # Check if the tabulate package is installed on the system
+        python -c "import tabulate" 2> /dev/null \
+            || (echo 'The tabulate package needs to be installed manually' \
+            'before installing Synergy (e.g. "pip install tabulate").' >&2 \
+            && exit 1)
+    ;;
+
+    upgrade)
     ;;
 
     abort-upgrade)
