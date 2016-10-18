@@ -8,6 +8,3 @@ eventlet
 oslo.config
 python-dateutil
 requests
-
-# Packages not available as system packages (rpm or deb)
-tabulate
