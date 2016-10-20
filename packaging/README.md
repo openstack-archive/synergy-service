@@ -64,19 +64,25 @@ inside the synergy-service directory.
 Packaging for Ubuntu
 --------------------
 
+Make sure you have the [OpenStack/CloudArchive repository](https://wiki.ubuntu.com/OpenStack/CloudArchive) setup.
+
 1. Install the necessary build packages:
   - debhelper
   - dh-systemd
   - build-essential
   - devscripts
+  - git-core
   - python-all
+  - python-pbr
   - python-setuptools
 
-2. Make a gzip archive of synergy-service named `python-synergy-service_VERSION.orig.tar.gz`.
+2. Make a gzip archive of synergy-service named `python-synergy-service_VERSION.orig.tar.gz` and place it at the same level as the `synergy-service` directory.
 
 3. Copy `synergy-service/packaging/debian` to `synergy-service/debian`.
 
 4. Go in the `synergy-service` directory and build with `debuild -us -uc`.
+
+The resulting .deb file should be outputed at the same level as the `synergy-service` directory and .tar.gz archive.
 
 
 Packaging for CentOS
