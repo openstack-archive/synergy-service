@@ -4,6 +4,7 @@ RUN yum install -y centos-release-openstack-liberty \
                    rpm-build \
                    python-devel \
                    python-setuptools \
+                   git-core \
     && yum update -y
 RUN mkdir /tmp/synergy-service
 RUN useradd -m -p pkger pkger
