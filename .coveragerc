@@ -1,7 +1,6 @@
 [run]
 branch = True
 source = synergy
-omit = synergy/openstack/*
 
 [report]
 ignore_errors = True
