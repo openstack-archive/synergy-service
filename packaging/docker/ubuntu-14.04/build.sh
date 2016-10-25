@@ -6,7 +6,7 @@ PKG_DIR=/tmp/synergy-service
 function copy_source() {
     cd /home/pkger
     cp -r $PKG_DIR python-synergy-service
-    rm -r python-synergy-service/{.tox,.testrepository,build,dist} || true
+    rm -r python-synergy-service/{.eggs,.tox,.testrepository,build,dist} || true
 }
 
 function get_version() {
