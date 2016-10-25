@@ -21,6 +21,7 @@ Requires:         python2-eventlet >= 0.17
 Requires:         python2-oslo-config >= 2.4
 Requires:         python-pbr >= 1.8
 Requires:         python-dateutil >= 2.4
+Requires:         python-requests >= 2.10.0
 
 
 %description
