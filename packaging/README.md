@@ -92,20 +92,24 @@ Packaging for CentOS
   - rpm-build
   - python-devel
   - python-setuptools
+  - git-core
+  - centos-release-openstack-liberty
 
-2. Setup your rpmbuild environment if not already done.
+2. Update your packages with `yum update` and then install `python-pbr`.
+
+3. Setup your rpmbuild environment if not already done.
 
        mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
-3. Move `synergy-service/packaging/rpm/python-synergy.spec` to
+4. Move `synergy-service/packaging/rpm/python-synergy.spec` to
    `~/rpmbuild/SPECS`.
 
-4. Create a source archive (where $VERSION is the current synergy-service version):
+5. Create a source archive (where $VERSION is the current synergy-service version):
 
        cd ~/rpmbuild/SOURCES
        cp -r /path/to/synergy-service python-synergy-service-$VERSION
        tar cjf python-synergy-service-$VERSION.tar.bz2 python-synergy-service-$VERSION
 
-5. Go in `~/rpmbuild/SPECS` and build with `PBR_VERSION=$VERSION rpmbuild -ba python-synergy.spec`.
+6. Go in `~/rpmbuild/SPECS` and build with `PBR_VERSION=$VERSION rpmbuild -ba python-synergy.spec`.
 
-6. The resulting RPM can be found in `~/rpmbuild/RPMS/noarch`.
+7. The resulting RPM can be found in `~/rpmbuild/RPMS/noarch`.
