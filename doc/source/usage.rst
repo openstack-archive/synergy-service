@@ -2,6 +2,6 @@
 Usage
 ========
 
-To use synergy in a project::
+The command line interface documentation can be found here:
 
-    import synergy
+   https://indigo-dc.gitbooks.io/synergy/content/doc/admin.html#the-synergy-command-line-interface
