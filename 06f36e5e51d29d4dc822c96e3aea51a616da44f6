@@ -1,0 +1,8 @@
+Code-Review+2: Lisa Zangrando <lisa.zangrando@pd.infn.it>
+Workflow+1: Lisa Zangrando <lisa.zangrando@pd.infn.it>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 28 Oct 2016 13:39:56 +0000
+Reviewed-on: https://review.openstack.org/391454
+Project: openstack/synergy-service
+Branch: refs/heads/master
