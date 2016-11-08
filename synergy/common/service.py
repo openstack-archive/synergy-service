@@ -3,10 +3,7 @@ import os
 import signal
 import sys
 
-try:
-    from oslo_config import cfg
-except ImportError:
-    from oslo.config import cfg
+from oslo_config import cfg
 
 
 __author__ = "Lisa Zangrando"

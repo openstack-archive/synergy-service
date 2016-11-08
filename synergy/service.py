@@ -9,10 +9,7 @@ from cgi import escape
 from cgi import parse_qs
 from pkg_resources import iter_entry_points
 
-try:
-    from oslo_config import cfg
-except ImportError:
-    from oslo.config import cfg
+from oslo_config import cfg
 
 from synergy.common import config
 from synergy.common.manager import Manager
