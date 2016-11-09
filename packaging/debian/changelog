@@ -1,3 +1,17 @@
+python-synergy-service (1.2.0-1ubuntu1) unstable; urgency=low
+
+  * use pbr fully for easier package building
+  * RPM: don't output errors on uninstallation
+  * Fix conf for AMQP virtual host
+  * Added unit tests
+  * Fixed destroy() method
+  * Fixed serializer
+  * Fixed logging for managers
+  * fix eventlet and dateutil required versions
+  * Fix requirement version pinning
+
+ -- Vincent Llorens <vincent.llorens@cc.in2p3.fr>  Wed, 09 Nov 2016 15:35:11 +0100
+
 python-synergy-service (1.1.0) unstable; urgency=low
 
   * Improve Synergy serialization capabilities

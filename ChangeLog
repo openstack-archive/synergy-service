@@ -1,7 +1,23 @@
 CHANGES
 =======
 
-* use pbr fully and use postversioning
+* Clean up oslo imports
+* Update the Sphinx documentation
+* fix packaging with docker and its documentation
+* Distribute tabulate as part of Synergy
+* Remove versions for required packages
+* fix missing "requests" from the requirements
+* Updated coverage configuration file
+* fix docker packaging for CentOS
+* fix wrong version of eventlet
+* fix docs for packaging with Ubuntu
+* fix to get the synergy version when packaging
+* fix required packages when packaging
+
+1.2.0
+-----
+
+* use pbr fully for easier package building
 * RPM: don't output errors on uninstallation
 * Fix conf for AMQP virtual host
 * Added unit tests

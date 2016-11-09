@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          1.1.0
+Version:          1.2.0
 Release:          1%{?dist}
 Summary:          Synergy service
 
@@ -92,6 +92,17 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Wed Nov 09 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 1.2.0-1
+- use pbr fully for easier package building
+- RPM: don't output errors on uninstallation
+- Fix conf for AMQP virtual host
+- Added unit tests
+- Fixed destroy() method
+- Fixed serializer
+- Fixed logging for managers
+- fix eventlet and dateutil required versions
+- Fix requirement version pinning
+
 * Wed Sep 21 2016 Ervin Konomi <ervin.konomi@pd.infn.it - 1.1.0-1
 - Improve Synergy serialization capabilities
 - Streamline the packaging process
