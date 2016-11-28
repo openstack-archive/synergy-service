@@ -95,7 +95,9 @@ class Token(object):
                                             "%Y-%m-%dT%H:%M:%S.%fZ")
         self.project = data["project"]
         self.user = data["user"]
-        self.extras = data["extras"]
+
+        if "extras" in data:
+            self.extras = data["extras"]
 
     def getCatalog(self, service_name=None, interface="public"):
         if service_name:
@@ -245,14 +247,21 @@ class Token(object):
 
 class KeystoneClient(object):
 
-    def __init__(self, auth_url, username, password, project_id=None,
-                 project_name=None, timeout=None,
+    def __init__(self, auth_url, username, password,
+                 user_domain_id=None,
+                 user_domain_name="default", project_id=None,
+                 project_name=None, project_domain_id=None,
+                 project_domain_name="default", timeout=None,
                  default_trust_expiration=None):
         self.auth_url = auth_url
         self.username = username
         self.password = password
+        self.user_domain_id = user_domain_id
+        self.user_domain_name = user_domain_name
         self.project_id = project_id
         self.project_name = project_name
+        self.project_domain_id = project_domain_id
+        self.project_domain_name = project_domain_name
         self.timeout = timeout
         self.token = None
 
@@ -275,9 +284,21 @@ class KeystoneClient(object):
                    "Accept": "application/json",
                    "User-Agent": "python-novaclient"}
 
+        user_domain = {}
+        if self.user_domain_id is not None:
+            user_domain["id"] = self.user_domain_id
+        else:
+            user_domain["name"] = self.user_domain_name
+
+        project_domain = {}
+        if self.project_domain_id is not None:
+            project_domain["id"] = self.project_domain_id
+        else:
+            project_domain["name"] = self.project_domain_name
+
         identity = {"methods": ["password"],
                     "password": {"user": {"name": self.username,
-                                          "domain": {"id": "default"},
+                                          "domain": user_domain,
                                           "password": self.password}}}
 
         data = {"auth": {}}
@@ -285,11 +306,11 @@ class KeystoneClient(object):
 
         if self.project_name:
             data["auth"]["scope"] = {"project": {"name": self.project_name,
-                                                 "domain": {"id": "default"}}}
+                                                 "domain": project_domain}}
 
         if self.project_id:
             data["auth"]["scope"] = {"project": {"id": self.project_id,
-                                                 "domain": {"id": "default"}}}
+                                                 "domain": project_domain}}
 
         response = requests.post(url=self.auth_url + "/auth/tokens",
                                  headers=headers,

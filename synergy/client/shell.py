@@ -52,6 +52,16 @@ def main():
                             default=os.environ.get("OS_PASSWORD"),
                             help="defaults to env[OS_PASSWORD]")
 
+        parser.add_argument("--os-user-domain-id",
+                            metavar="<auth-user-domain-id>",
+                            default=os.environ.get("OS_USER_DOMAIN_ID"),
+                            help="defaults to env[OS_USER_DOMAIN_ID]")
+
+        parser.add_argument("--os-user-domain-name",
+                            metavar="<auth-user-domain-name>",
+                            default=os.environ.get("OS_USER_DOMAIN_NAME"),
+                            help="defaults to env[OS_USER_DOMAIN_NAME]")
+
         parser.add_argument("--os-project-name",
                             metavar="<auth-project-name>",
                             default=os.environ.get("OS_PROJECT_NAME"),
@@ -61,6 +71,16 @@ def main():
                             metavar="<auth-project-id>",
                             default=os.environ.get("OS_PROJECT_ID"),
                             help="defaults to env[OS_PROJECT_ID]")
+
+        parser.add_argument("--os-project-domain-id",
+                            metavar="<auth-project-domain-id>",
+                            default=os.environ.get("OS_PROJECT_DOMAIN_ID"),
+                            help="defaults to env[OS_PROJECT_DOMAIN_ID]")
+
+        parser.add_argument("--os-project-domain-name",
+                            metavar="<auth-project-domain-name>",
+                            default=os.environ.get("OS_PROJECT_DOMAIN_NAME"),
+                            help="defaults to env[OS_PROJECT_DOMAIN_NAME]")
 
         parser.add_argument("--os-auth-token",
                             metavar="<auth-token>",
@@ -122,7 +142,11 @@ def main():
 
         os_username = args.os_username
         os_password = args.os_password
+        os_user_domain_id = args.os_user_domain_id
+        os_user_domain_name = args.os_user_domain_name
         os_project_name = args.os_project_name
+        os_project_domain_id = args.os_project_domain_id
+        os_project_domain_name = args.os_project_domain_name
         os_auth_token = args.os_auth_token
         os_auth_token_cache = args.os_auth_token_cache
         os_auth_url = args.os_auth_url
@@ -141,10 +165,21 @@ def main():
         if not os_auth_url:
             raise Exception("'os-auth-url' not defined!")
 
-        client = keystone_v3.KeystoneClient(auth_url=os_auth_url,
-                                            username=os_username,
-                                            password=os_password,
-                                            project_name=os_project_name)
+        if not os_user_domain_name:
+            os_user_domain_name = "default"
+
+        if not os_project_domain_name:
+            os_project_domain_name = "default"
+
+        client = keystone_v3.KeystoneClient(
+            auth_url=os_auth_url,
+            username=os_username,
+            password=os_password,
+            user_domain_id=os_user_domain_id,
+            user_domain_name=os_user_domain_name,
+            project_name=os_project_name,
+            project_domain_id=os_project_domain_id,
+            project_domain_name=os_project_domain_name)
 
         token = None
 
