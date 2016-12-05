@@ -1,8 +1,8 @@
 import copy
 import six
-import uuid
 
 from datetime import datetime
+from oslo_utils import uuidutils
 
 
 __author__ = "Lisa Zangrando"
@@ -25,7 +25,7 @@ permissions and limitations under the License."""
 
 
 def generate_request_id():
-    return 'req-' + str(uuid.uuid4())
+    return 'req-' + uuidutils.generate_uuid()
 
 
 class RequestContext(object):
