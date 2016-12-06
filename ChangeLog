@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+* Release v1.3.0 with packaging files
+* Replaces uuid.uuid4 with uuidutils.generate_uuid(
+* [packaging] make docker aware of PKG_VERSION
+* Added support for OpenStack DOMAIN to shell.py
+* Update changelogs and system package versions
 * Clean up oslo imports
 * Update the Sphinx documentation
 * fix packaging with docker and its documentation
