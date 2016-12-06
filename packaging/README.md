@@ -36,6 +36,10 @@ inside the synergy-service directory.
       docker run -i -v /path/to/synergy-service:/tmp/synergy-service \
                  synergy-centos7-builder
 
+  You can override the package version that will be set during the packaging
+  process by adding `-e "PKG_VERSION=x.y.z"` to the above command line.
+  Otherwise, the package version will be set to the latest git tag.
+
   This actually mount the synergy-service directory to `/tmp/synergy-service` on
   the guest.
 
@@ -57,6 +61,10 @@ inside the synergy-service directory.
 
       docker run -i -v /path/to/synergy-service:/tmp/synergy-service \
                  synergy-ubuntu14.04-builder
+
+  You can override the package version that will be set during the packaging
+  process by adding `-e "PKG_VERSION=x.y.z"` to the above command line.
+  Otherwise, the package version will be set to the latest git tag.
 
 - the resulting deb should be in the build directory if successful
 
