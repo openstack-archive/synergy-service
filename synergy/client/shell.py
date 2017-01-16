@@ -35,7 +35,7 @@ def main():
                                        " OpenStack Synergy API.")
 
         # Global arguments
-        parser.add_argument("--version", action="version", version="v1.0")
+        parser.add_argument("--version", action="version", version="v1.1")
 
         parser.add_argument("--debug",
                             default=False,
@@ -99,11 +99,6 @@ def main():
                             default=os.environ.get("OS_AUTH_URL"),
                             help="defaults to env[OS_AUTH_URL]")
 
-        parser.add_argument("--os-auth-system",
-                            metavar="<auth-system>",
-                            default=os.environ.get("OS_AUTH_SYSTEM"),
-                            help="defaults to env[OS_AUTH_SYSTEM]")
-
         parser.add_argument("--bypass-url",
                             metavar="<bypass-url>",
                             dest="bypass_url",
@@ -116,16 +111,6 @@ def main():
                             help="Specify a CA bundle file to use in verifying"
                                  " a TLS (https) server certificate. Defaults "
                                  "to env[OS_CACERT]")
-        """
-        parser.add_argument("--insecure",
-                            default=os.environ.get("INSECURE", False),
-                            action="store_true",
-                            help="explicitly allow Synergy's client to perform"
-                                 " \"insecure\" SSL (https) requests. The "
-                                 "server's certificate will not be verified "
-                                 "against any certificate authorities. This "
-                                 "option should be used with caution.")
-        """
 
         subparser = parser.add_subparsers(help="commands", dest="command_name")
         commands = {}
@@ -150,56 +135,58 @@ def main():
         os_auth_token = args.os_auth_token
         os_auth_token_cache = args.os_auth_token_cache
         os_auth_url = args.os_auth_url
+        os_cacert = args.os_cacert
         bypass_url = args.bypass_url
         command_name = args.command_name
-
-        if not os_username:
-            raise Exception("'os-username' not defined!")
-
-        if not os_password:
-            raise Exception("'os-password' not defined!")
-
-        if not os_project_name:
-            raise Exception("'os-project-name' not defined!")
-
-        if not os_auth_url:
-            raise Exception("'os-auth-url' not defined!")
-
-        if not os_user_domain_name:
-            os_user_domain_name = "default"
-
-        if not os_project_domain_name:
-            os_project_domain_name = "default"
-
-        client = keystone_v3.KeystoneClient(
-            auth_url=os_auth_url,
-            username=os_username,
-            password=os_password,
-            user_domain_id=os_user_domain_id,
-            user_domain_name=os_user_domain_name,
-            project_name=os_project_name,
-            project_domain_id=os_project_domain_id,
-            project_domain_name=os_project_domain_name)
-
-        token = None
-
-        if os_auth_token:
-            token = os_auth_token
-        elif os_auth_token_cache:
-            token = keystone_v3.Token.load(".auth_token")
-
-            if token is None or token.isExpired():
-                client.authenticate()
-                token = client.getToken()
-                token.save(".auth_token")
-        else:
-            client.authenticate()
-            token = client.getToken()
-
         synergy_url = None
+
         if bypass_url:
             synergy_url = bypass_url
         else:
+            if not os_username:
+                raise Exception("'os-username' not defined!")
+
+            if not os_password:
+                raise Exception("'os-password' not defined!")
+
+            if not os_project_name:
+                raise Exception("'os-project-name' not defined!")
+
+            if not os_auth_url:
+                raise Exception("'os-auth-url' not defined!")
+
+            if not os_user_domain_name:
+                os_user_domain_name = "default"
+
+            if not os_project_domain_name:
+                os_project_domain_name = "default"
+
+            client = keystone_v3.KeystoneClient(
+                auth_url=os_auth_url,
+                username=os_username,
+                password=os_password,
+                ca_cert=os_cacert,
+                user_domain_id=os_user_domain_id,
+                user_domain_name=os_user_domain_name,
+                project_name=os_project_name,
+                project_domain_id=os_project_domain_id,
+                project_domain_name=os_project_domain_name)
+
+            token = None
+
+            if os_auth_token:
+                token = os_auth_token
+            elif os_auth_token_cache:
+                token = keystone_v3.Token.load(".auth_token")
+
+                if token is None or token.isExpired():
+                    client.authenticate()
+                    token = client.getToken()
+                    token.save(".auth_token")
+            else:
+                client.authenticate()
+                token = client.getToken()
+
             synergy_service = client.getService(name="synergy")
 
             synergy_endpoint = client.getEndpoint(

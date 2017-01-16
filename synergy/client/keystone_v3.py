@@ -252,7 +252,7 @@ class KeystoneClient(object):
                  user_domain_name="default", project_id=None,
                  project_name=None, project_domain_id=None,
                  project_domain_name="default", timeout=None,
-                 default_trust_expiration=None):
+                 default_trust_expiration=None, ca_cert=None):
         self.auth_url = auth_url
         self.username = username
         self.password = password
@@ -264,6 +264,7 @@ class KeystoneClient(object):
         self.project_domain_name = project_domain_name
         self.timeout = timeout
         self.token = None
+        self.ca_cert = ca_cert
 
         if default_trust_expiration:
             self.default_trust_expiration = default_trust_expiration
@@ -315,7 +316,8 @@ class KeystoneClient(object):
         response = requests.post(url=self.auth_url + "/auth/tokens",
                                  headers=headers,
                                  data=json.dumps(data),
-                                 timeout=self.timeout)
+                                 timeout=self.timeout,
+                                 verify=self.ca_cert)
 
         if response.status_code != requests.codes.ok:
             response.raise_for_status()
@@ -454,7 +456,8 @@ class KeystoneClient(object):
 
         response = requests.delete(url=self.auth_url + "/auth/tokens",
                                    headers=headers,
-                                   timeout=self.timeout)
+                                   timeout=self.timeout,
+                                   verify=self.ca_cert)
 
         self.token = None
 
@@ -473,7 +476,8 @@ class KeystoneClient(object):
 
         response = requests.get(url=self.auth_url + "/auth/tokens",
                                 headers=headers,
-                                timeout=self.timeout)
+                                timeout=self.timeout,
+                                verify=self.ca_cert)
 
         if response.status_code != requests.codes.ok:
             response.raise_for_status()
@@ -577,27 +581,32 @@ class KeystoneClient(object):
             response = requests.get(url,
                                     headers=headers,
                                     params=data,
-                                    timeout=self.timeout)
+                                    timeout=self.timeout,
+                                    verify=self.ca_cert)
         elif method == "POST":
             response = requests.post(url,
                                      headers=headers,
                                      data=json.dumps(data),
-                                     timeout=self.timeout)
+                                     timeout=self.timeout,
+                                     verify=self.ca_cert)
         elif method == "PUT":
             response = requests.put(url,
                                     headers=headers,
                                     data=json.dumps(data),
-                                    timeout=self.timeout)
+                                    timeout=self.timeout,
+                                    verify=self.ca_cert)
         elif method == "HEAD":
             response = requests.head(url,
                                      headers=headers,
                                      data=json.dumps(data),
-                                     timeout=self.timeout)
+                                     timeout=self.timeout,
+                                     verify=self.ca_cert)
         elif method == "DELETE":
             response = requests.delete(url,
                                        headers=headers,
                                        data=json.dumps(data),
-                                       timeout=self.timeout)
+                                       timeout=self.timeout,
+                                       verify=self.ca_cert)
         else:
             raise Exception("wrong HTTP method: %s" % method)
 
