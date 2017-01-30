@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          1.3.0
+Version:          1.4.0
 Release:          1%{?dist}
 Summary:          Synergy service
 
@@ -92,6 +92,11 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Mon Jan 30 2017 Ervin Konomi <ervin.konomi@pd.infn.it> - 1.4.0-1
+- Update of the links to the Synergy documentation
+- Update of the Synergy configuration file
+- The Synergy CLI is not SSL-enabled
+
 * Tue Dec 06 2016 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 1.3.0-1
 - Replaces uuid.uuid4 with uuidutils.generate_uuid
 - [packaging] make docker aware of PKG_VERSION

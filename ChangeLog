@@ -1,8 +1,15 @@
 CHANGES
 =======
 
+* Update of the links to the Synergy documentation
+* Update of the Synergy configuration file
+* The Synergy CLI is not SSL-enabled
+
+1.3.0
+-----
+
 * Release v1.3.0 with packaging files
-* Replaces uuid.uuid4 with uuidutils.generate_uuid(
+* Replaces uuid.uuid4 with uuidutils.generate_uuid()
 * [packaging] make docker aware of PKG_VERSION
 * Added support for OpenStack DOMAIN to shell.py
 * Update changelogs and system package versions
