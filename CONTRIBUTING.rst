@@ -4,4 +4,4 @@ Bugs should be filed on Launchpad, not GitHub:
 
 Also check the developer documentation at:
 
-   https://indigo-dc.gitbooks.io/synergy/content/doc/developer.html
+   https://indigo-dc.gitbooks.io/synergy-doc/content/doc/developer.html
