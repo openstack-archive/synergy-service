@@ -77,7 +77,7 @@ exit 0
 
 
 %post
-%systemd_post synergy.service
+#%systemd_post synergy.service
 
 
 %preun
