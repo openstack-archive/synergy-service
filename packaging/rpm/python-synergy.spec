@@ -74,16 +74,11 @@ getent passwd synergy > /dev/null || \
 exit 0
 
 
-%post
-%systemd_post synergy.service
-
-
 %preun
 %systemd_preun synergy.service
 
 
 %postun
-%systemd_postun_with_restart synergy.service
 if [ "$1" = 0 ]; then
     userdel -r synergy 2> /dev/null || true
     groupdel synergy 2> /dev/null || true

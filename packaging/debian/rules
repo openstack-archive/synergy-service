@@ -26,6 +26,12 @@ override_dh_installinit:
 
 override_dh_auto_test:
 
+override_dh_systemd_start:
+	dh_systemd_start --no-start --no-restart-on-upgrade
+
+override_dh_systemd_enable:
+	dh_systemd_enable --no-enable
+
 # debmake generated override targets
 # This is example for Cmake (See http://bugs.debian.org/641051 )
 #override_dh_auto_configure:

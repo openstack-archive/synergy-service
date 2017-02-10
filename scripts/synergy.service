@@ -6,7 +6,7 @@ After=mysql.service postgresql.service slapd.service rabbitmq-server.service ntp
 User=synergy
 Group=synergy
 WorkingDirectory=/var/lib/synergy
-ExecStart=/usr/bin/synergy-service
+ExecStart=/usr/bin/synergy-service --config-dir /etc/synergy/
 
 [Install]
 WantedBy=multi-user.target
