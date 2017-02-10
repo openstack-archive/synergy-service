@@ -16,4 +16,5 @@ script
 	exec start-stop-daemon --start --chdir /var/lib/synergy \
 		--chuid synergy:synergy --make-pidfile --pidfile /var/run/synergy/synergy.pid \
 		--exec /usr/bin/synergy-service -- --config-file=/etc/synergy/synergy.conf ${DAEMON_ARGS}
+
 end script
