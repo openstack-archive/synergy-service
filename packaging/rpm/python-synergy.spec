@@ -49,7 +49,6 @@ install -D -m0644 config/synergy.conf       %{buildroot}%{_sysconfdir}/synergy/s
 install -D -m0644 scripts/synergy.service   %{buildroot}%{_unitdir}/synergy.service
 install -d -m0700                           %{buildroot}%{_localstatedir}/lib/synergy
 install -d -m0755                           %{buildroot}%{_localstatedir}/log/synergy
-touch                                       %{buildroot}%{_localstatedir}/log/synergy/synergy.log
 install -d -m0755                           %{buildroot}%{_localstatedir}/run/synergy
 install -d -m0755                           %{buildroot}%{_localstatedir}/lock/synergy
 
@@ -64,7 +63,6 @@ install -d -m0755                           %{buildroot}%{_localstatedir}/lock/s
 %defattr(-, synergy, root, -)
 %{_localstatedir}/lock/synergy/
 %{_localstatedir}/log/synergy/
-%{_localstatedir}/log/synergy/synergy.log
 %{_localstatedir}/run/synergy/
 %attr(700, synergy, root) %{_localstatedir}/lib/synergy/
 
