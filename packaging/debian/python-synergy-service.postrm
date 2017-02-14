@@ -20,11 +20,7 @@ set -e
 
 
 case "$1" in
-    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
-    ;;
-
-    purge)
-        update-rc.d python-synergy-service remove >/dev/null
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear|purge)
     ;;
 
     *)
