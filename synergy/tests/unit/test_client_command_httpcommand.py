@@ -39,16 +39,6 @@ class TestHTTPCommand(base.TestCase):
             self.http_command.configureParser,
             "dummy_subparser")
 
-    def test_execute_request_fail(self):
-        mock_response = mock.Mock()
-        # bad status code that will raise an error
-        mock_response.status_code = 400
-
-        with mock.patch.object(requests, "get", return_value=mock_response):
-            self.http_command.execute("dummy_url")
-
-        mock_response.raise_for_status.assert_called()
-
     def test_execute_success(self):
         mock_response = mock.Mock()
         mock_response.text = '{"test": true}'  # mock a simple json response
