@@ -37,15 +37,13 @@ class HTTPCommand(object):
 
     def execute(self, synergy_url, payload=None):
         request = requests.get(synergy_url, params=payload)
-
-        if request.status_code != requests.codes.ok:
-            request.raise_for_status()
+        request.raise_for_status()
 
         self.results = request.json()
 
         try:
             return json.loads(request.text, object_hook=objectHookHandler)
-        except Exception:
+        except ValueError:
             return request.json()
 
     def getResults(self):
