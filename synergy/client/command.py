@@ -45,7 +45,7 @@ class HTTPCommand(object):
 
         try:
             return json.loads(request.text, object_hook=objectHookHandler)
-        except Exception:
+        except ValueError:
             return request.json()
 
     def getResults(self):
