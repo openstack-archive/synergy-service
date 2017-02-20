@@ -392,7 +392,7 @@ class KeystoneClient(object):
             response = self.getResource("/projects/%s" % id, "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the project (id=%r, "
+            raise Exception("error on retrieving the project (id=%r): %s"
                             % (id, response["error"]["message"]))
 
         if response:
@@ -509,7 +509,7 @@ class KeystoneClient(object):
                 response = ex.response.json()
                 raise Exception("error on retrieving the endpoints list"
                                 "(serviceId=%r): %s"
-                                % response["error"]["message"])
+                                % (service_id, response["error"]["message"]))
 
             if endpoints:
                 for endpoint in endpoints:
