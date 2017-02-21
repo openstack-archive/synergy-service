@@ -1,0 +1,8 @@
+Code-Review+2: Vincent Llorens <vincent.llorens@cc.in2p3.fr>
+Workflow+1: Vincent Llorens <vincent.llorens@cc.in2p3.fr>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 21 Feb 2017 13:46:35 +0000
+Reviewed-on: https://review.openstack.org/435957
+Project: openstack/synergy-service
+Branch: refs/heads/master
