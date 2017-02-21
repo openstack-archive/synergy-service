@@ -2,7 +2,7 @@
 set -e -x
 
 RPMBUILD=/home/pkger/rpmbuild
-PKG_DIR=/tmp/synergy-service
+PKG_DIR=/tmp/synergy
 
 function get_version() {
     if [[ -z $PKG_VERSION ]]; then

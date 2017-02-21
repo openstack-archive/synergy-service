@@ -33,14 +33,14 @@ inside the synergy-service directory.
 
 - launch the container
 
-      docker run -i -v /path/to/synergy-service:/tmp/synergy-service \
+      docker run -i -v /path/to/synergy-service:/tmp/synergy \
                  synergy-centos7-builder
 
   You can override the package version that will be set during the packaging
   process by adding `-e "PKG_VERSION=x.y.z"` to the above command line.
   Otherwise, the package version will be set to the latest git tag.
 
-  This actually mount the synergy-service directory to `/tmp/synergy-service` on
+  This actually mount the synergy-service directory to `/tmp/synergy` on
   the guest.
 
 - the resulting rpm should be in the build directory if successful
@@ -59,7 +59,7 @@ inside the synergy-service directory.
 
 - launch the container
 
-      docker run -i -v /path/to/synergy-service:/tmp/synergy-service \
+      docker run -i -v /path/to/synergy-service:/tmp/synergy \
                  synergy-ubuntu14.04-builder
 
   You can override the package version that will be set during the packaging
