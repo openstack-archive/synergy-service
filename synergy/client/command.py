@@ -68,19 +68,19 @@ class ManagerCommand(HTTPCommand):
             "status", add_help=True, help="show the managers status")
 
         status_parser.add_argument(
-            "manager", nargs='*', help="the managers list")
+            "manager", nargs='*', help="one or more manager name")
 
         start_parser = manager_parsers.add_parser(
             "start", add_help=True, help="start the manager")
 
         start_parser.add_argument(
-            "manager", nargs='+', help="the managers list")
+            "manager", nargs='+', help="one or more manager name")
 
         stop_parser = manager_parsers.add_parser(
             "stop", add_help=True, help="stop the manager")
 
         stop_parser.add_argument(
-            "manager", nargs='+', help="the managers list")
+            "manager", nargs='+', help="one or more manager name")
 
     def execute(self, synergy_url, args=None):
         table = []
@@ -110,8 +110,6 @@ class ManagerCommand(HTTPCommand):
                                   manager.getStatus(),
                                   manager.getRate()])
             else:
-                headers.append("details")
-
                 for manager in managers:
                     msg = manager.get("message")
 
