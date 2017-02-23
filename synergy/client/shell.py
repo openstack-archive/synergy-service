@@ -82,18 +82,6 @@ def main():
                             default=os.environ.get("OS_PROJECT_DOMAIN_NAME"),
                             help="defaults to env[OS_PROJECT_DOMAIN_NAME]")
 
-        parser.add_argument("--os-auth-token",
-                            metavar="<auth-token>",
-                            default=os.environ.get("OS_AUTH_TOKEN", None),
-                            help="defaults to env[OS_AUTH_TOKEN]")
-
-        parser.add_argument('--os-auth-token-cache',
-                            default=os.environ.get("OS_AUTH_TOKEN_CACHE",
-                                                   False),
-                            action='store_true',
-                            help="Use the auth token cache. Defaults to False "
-                                 "if env[OS_AUTH_TOKEN_CACHE] is not set")
-
         parser.add_argument("--os-auth-url",
                             metavar="<auth-url>",
                             default=os.environ.get("OS_AUTH_URL"),
@@ -132,13 +120,10 @@ def main():
         os_project_name = args.os_project_name
         os_project_domain_id = args.os_project_domain_id
         os_project_domain_name = args.os_project_domain_name
-        os_auth_token = args.os_auth_token
-        os_auth_token_cache = args.os_auth_token_cache
         os_auth_url = args.os_auth_url
         os_cacert = args.os_cacert
         bypass_url = args.bypass_url
         command_name = args.command_name
-        synergy_url = None
 
         if bypass_url:
             synergy_url = bypass_url
@@ -172,22 +157,13 @@ def main():
                 project_domain_id=os_project_domain_id,
                 project_domain_name=os_project_domain_name)
 
-            token = None
-
-            if os_auth_token:
-                token = os_auth_token
-            elif os_auth_token_cache:
-                token = keystone_v3.Token.load(".auth_token")
-
-                if token is None or token.isExpired():
-                    client.authenticate()
-                    token = client.getToken()
-                    token.save(".auth_token")
-            else:
-                client.authenticate()
-                token = client.getToken()
+            client.authenticate()
 
             synergy_service = client.getService(name="synergy")
+
+            if not synergy_service:
+                print("Synergy service not found into the Keystone catalog!")
+                sys.exit(1)
 
             synergy_endpoint = client.getEndpoint(
                 service_id=synergy_service["id"])
