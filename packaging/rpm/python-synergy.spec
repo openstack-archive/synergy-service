@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          1.4.0
+Version:          1.5.0
 Release:          1%{?dist}
 Summary:          Synergy service
 
@@ -85,6 +85,19 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Mon Mar 20 2017 Ervin Konomi <ervin.konomi@pd.infn.it> - 1.5.0-1
+- add some unit tests for Trust
+- CLI: remove auth_token, unused vars and add tests
+- add some unit tests for ExecuteCommand
+- add some unit tests for the ManagerCommand class
+- simplify packaging with docker
+- fix one instance of "except Exception"
+- add some unit tests for HTTPCommand
+- fix missing elements in string formatting
+- remove support for SysV init and Upstart
+- Removed all managers parameters in synergy.conf
+- fix synergy erasing log file on upgrade
+
 * Mon Jan 30 2017 Ervin Konomi <ervin.konomi@pd.infn.it> - 1.4.0-1
 - Update of the links to the Synergy documentation
 - Update of the Synergy configuration file
