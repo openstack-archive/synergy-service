@@ -4,8 +4,8 @@ Packaging
 Packaging for Ubuntu and CentOS using Docker
 --------------------------------------------
 
-We provide Dockerfiles for CentOS 7 and Ubuntu 14.04.  A Dockerfile for Ubuntu >
-14.04 should work by just changing the "FROM" statement of the Ubuntu 14.04
+We provide Dockerfiles for CentOS 7 and Ubuntu 16.04.  A Dockerfile for Ubuntu >
+16.04 should work by just changing the "FROM" statement of the Ubuntu 16.04
 Dockerfile.  Using these, you can easily build rpm and deb packages for
 synergy-service without having to setup the build system on your own system.
 
@@ -46,21 +46,21 @@ inside the synergy-service directory.
 - the resulting rpm should be in the build directory if successful
 
 
-### Example for Ubuntu 14.04
+### Example for Ubuntu 16.04
 
-- go into the directory that contains the Dockerfile for Ubuntu 14.04
+- go into the directory that contains the Dockerfile for Ubuntu 16.04
 
-      cd synergy-service/packaging/docker/ubuntu-14.04
+      cd synergy-service/packaging/docker/ubuntu-16.04
 
 - build the docker image and tag it
 
-      docker build -t synergy-ubuntu14.04-builder .
+      docker build -t synergy-ubuntu16.04-builder .
 
 
 - launch the container
 
       docker run -i -v /path/to/synergy-service:/tmp/synergy \
-                 synergy-ubuntu14.04-builder
+                 synergy-ubuntu16.04-builder
 
   You can override the package version that will be set during the packaging
   process by adding `-e "PKG_VERSION=x.y.z"` to the above command line.
@@ -101,7 +101,7 @@ Packaging for CentOS
   - python-devel
   - python-setuptools
   - git-core
-  - centos-release-openstack-liberty
+  - centos-release-openstack-newton
 
 2. Update your packages with `yum update` and then install `python-pbr`.
 
