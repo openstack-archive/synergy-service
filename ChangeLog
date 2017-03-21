@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+* Update synergy service packaging
+
+1.5.0
+-----
+
+* Release v1.5.0
 * add some unit tests for Trust
 * CLI: remove auth_token, unused vars and add tests
 * add some unit tests for ExecuteCommand
