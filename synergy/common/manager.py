@@ -59,8 +59,11 @@ class Manager(SynergyObject, Thread):
                                                       *args, **kargs)
         else:
             for manager in self.managers.values():
-                if manager.getName() != manager_name:
-                    manager.doOnEvent(event_type, *args, **kargs)
+                if manager.getName() != self.getName():
+                    try:
+                        manager.doOnEvent(event_type, *args, **kargs)
+                    except NotImplementedError:
+                        pass
 
     def getOptions(self):
         return self.config_opts
