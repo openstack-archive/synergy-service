@@ -66,14 +66,15 @@ def setLogger(name):
 
     # set logger level
     logger = logging.getLogger(name)
-    logger.propagate = False
 
-    try:
-        logger.setLevel(cfg.CONF.Logger.level)
-    except ValueError:  # wrong level, we default to INFO
-        logger.setLevel(logging.INFO)
+    if not len(logger.handlers):
+        try:
+            logger.setLevel(cfg.CONF.Logger.level)
+        except ValueError:  # wrong level, we default to INFO
+            logger.setLevel(logging.INFO)
 
-    logger.addHandler(handler)
+        logger.propagate = False
+        logger.addHandler(handler)
 
 
 class Synergy(Service):
@@ -104,6 +105,7 @@ class Synergy(Service):
                 manager_obj.setRate(CONF.get(entry.name).rate)
 
                 # Configure logging for manager
+                setLogger(manager_obj.__module__.rsplit('.', 1)[0])
                 setLogger(manager_obj.__module__)
 
                 self.managers[manager_obj.getName()] = manager_obj
