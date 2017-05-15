@@ -1,6 +1,7 @@
 import logging
 import time
 
+from synergy.exception import SynergyError
 from synergy.common.manager import Manager
 
 __author__ = "Lisa Zangrando"
@@ -38,7 +39,7 @@ class TimerManager(Manager):
         if command == "GET_TIME":
             return {"localtime": time.asctime(time.localtime(time.time()))}
         else:
-            raise Exception("command %r not supported" % command)
+            raise SynergyError("command %r not supported" % command)
 
     def destroy(self):
         LOG.info("%s destroy invoked!" % (self.name))

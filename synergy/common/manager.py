@@ -1,4 +1,7 @@
+import logging
+
 from serializer import SynergyObject
+from synergy.exception import SynergyError
 from threading import Condition
 from threading import Event
 from threading import Thread
@@ -21,6 +24,8 @@ software distributed under the License is distributed on an
 either express or implied.
 See the License for the specific language governing
 permissions and limitations under the License."""
+
+LOG = logging.getLogger(__name__)
 
 
 class Manager(SynergyObject, Thread):
@@ -133,5 +138,7 @@ class Manager(SynergyObject, Thread):
                     try:
                         self.task()
                         self.condition.wait(self.getRate() * 60)
-                    except Exception as ex:
-                        print("task %r: %s" % (self.getName(), ex))
+                    except NotImplementedError:
+                        pass
+                    except SynergyError as ex:
+                        LOG.error("task %s: %s" % (self.getName(), ex))

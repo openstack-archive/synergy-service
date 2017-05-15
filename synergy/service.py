@@ -16,6 +16,7 @@ from synergy.common.manager import Manager
 from synergy.common.serializer import SynergyEncoder
 from synergy.common.service import Service
 from synergy.common.wsgi import Server
+from synergy.exception import SynergyError
 
 
 __author__ = "Lisa Zangrando"
@@ -92,7 +93,7 @@ class Synergy(Service):
         self.wsgi_server = None
 
         for entry in iter_entry_points(MANAGER_ENTRY_POINT):
-            LOG.info("loading manager %r", entry.name)
+            LOG.info("loading manager %s", entry.name)
 
             try:
                 CONF.register_opts(config.manager_opts, group=entry.name)
@@ -111,28 +112,32 @@ class Synergy(Service):
                 self.managers[manager_obj.getName()] = manager_obj
 
                 CONF.register_opts(manager_obj.getOptions(), group=entry.name)
-            except Exception as ex:
+            except cfg.Error as ex:
                 LOG.error("Exception has occured", exc_info=1)
 
-                LOG.error("manager %r instantiation error: %s"
+                LOG.error("manager %s instantiation error: %s"
                           % (entry.name, ex))
 
-                raise Exception("manager %r instantiation error: %s"
-                                % (entry.name, ex))
+                raise SynergyError("manager %s instantiation error: %s"
+                                   % (entry.name, ex))
 
         for name, manager in self.managers.items():
             manager.managers = self.managers
 
             try:
-                LOG.info("initializing the %r manager" % (manager.getName()))
+                LOG.info("initializing the %s manager" % (manager.getName()))
 
                 manager.setup()
 
-                LOG.info("manager %r initialized!" % (manager.getName()))
-            except Exception as ex:
-                LOG.error("Exception has occured", exc_info=1)
+                LOG.info("manager %s initialized!" % (manager.getName()))
+            except NotImplementedError:
+                message = "manager %s instantiation error: setup() not " \
+                          "implemented!" % name
 
-                LOG.error("manager %r instantiation error: %s" % (name, ex))
+                LOG.error(message)
+                raise SynergyError(message)
+            except SynergyError as ex:
+                LOG.error("manager %s instantiation error: %s" % (name, ex))
                 self.managers[manager.getName()].setStatus("ERROR")
                 raise ex
 
@@ -184,7 +189,7 @@ class Synergy(Service):
 
         if len(manager_list) == 1 and len(result) == 0:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %r not found!" % manager_list[0]]
+            return ["manager %s not found!" % manager_list[0]]
 
         start_response("200 OK", [("Content-Type", "text/html")])
         return ["%s" % json.dumps(result, cls=SynergyEncoder)]
@@ -210,7 +215,7 @@ class Synergy(Service):
 
         if manager_name not in self.managers:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %r not found!" % manager_name]
+            return ["manager %s not found!" % manager_name]
 
         if "command" not in parameters:
             start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
@@ -232,7 +237,15 @@ class Synergy(Service):
 
             start_response("200 OK", [("Content-Type", "text/html")])
             return ["%s" % json.dumps(result, cls=SynergyEncoder)]
-        except Exception as ex:
+        except NotImplementedError:
+            message = "execute() not implemented!"
+
+            LOG.error(message)
+            start_response("500 INTERNAL SERVER ERROR",
+                           [("Content-Type", "text/plain")])
+            return ["error: %s" % message]
+
+        except SynergyError as ex:
             LOG.debug("execute command: error=%s" % ex)
             start_response("500 INTERNAL SERVER ERROR",
                            [("Content-Type", "text/plain")])
@@ -272,11 +285,11 @@ class Synergy(Service):
             result.append(m)
 
             if manager.getStatus() == "ACTIVE":
-                LOG.info("starting the %r manager" % (manager_name))
+                LOG.info("starting the %s manager" % (manager_name))
 
                 manager.resume()
 
-                LOG.info("%r manager started! (rate=%s min)"
+                LOG.info("%s manager started! (rate=%s min)"
                          % (manager_name, manager.getRate()))
 
                 m.setStatus("RUNNING")
@@ -290,7 +303,7 @@ class Synergy(Service):
 
         if len(manager_list) == 1 and len(result) == 0:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %r not found!" % manager_list[0]]
+            return ["manager %s not found!" % manager_list[0]]
 
         start_response("200 OK", [("Content-Type", "text/html")])
         return ["%s" % json.dumps(result, cls=SynergyEncoder)]
@@ -330,11 +343,11 @@ class Synergy(Service):
             result.append(m)
 
             if manager.getStatus() == "RUNNING":
-                LOG.info("stopping the %r manager" % (manager_name))
+                LOG.info("stopping the %s manager" % (manager_name))
 
                 manager.pause()
 
-                LOG.info("%r manager stopped!" % (manager_name))
+                LOG.info("%s manager stopped!" % (manager_name))
 
                 m.setStatus("ACTIVE")
                 m.set("message", "stopped successfully")
@@ -347,7 +360,7 @@ class Synergy(Service):
 
         if len(manager_list) == 1 and len(result) == 0:
             start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %r not found!" % manager_list[0]]
+            return ["manager %s not found!" % manager_list[0]]
 
         start_response("200 OK", [("Content-Type", "text/html")])
         return ["%s" % json.dumps(result, cls=SynergyEncoder)]
@@ -358,12 +371,12 @@ class Synergy(Service):
         for name, manager in self.managers.items():
             if manager.getStatus() != "ERROR":
                 try:
-                    LOG.info("starting the %r manager" % (name))
+                    LOG.info("starting the %s manager" % (name))
                     manager.start()
 
-                    LOG.info("%r manager started! (rate=%s min, status=%s)"
+                    LOG.info("%s manager started! (rate=%s min, status=%s)"
                              % (name, manager.getRate(), manager.getStatus()))
-                except Exception as ex:
+                except SynergyError as ex:
                     LOG.error("error occurred during the manager start %s"
                               % (ex))
                     manager.setStatus("ERROR")
@@ -407,7 +420,13 @@ class Synergy(Service):
                 manager.destroy()
                 # manager.join()
                 # LOG.info("%s manager destroyed" % (name))
-            except Exception as ex:
+            except NotImplementedError:
+                message = "method destroy() not implemented by the " \
+                          "%s manager" % manager.getName()
+
+                LOG.error(message)
+
+            except SynergyError as ex:
                 LOG.error("Exception has occured", exc_info=1)
 
                 manager.setStatus("ERROR")
