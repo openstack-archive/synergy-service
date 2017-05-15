@@ -2,6 +2,8 @@ import sys
 import traceback
 
 from datetime import datetime
+from synergy.exception import SynergyError
+
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
@@ -30,7 +32,7 @@ def import_class(import_str):
     try:
         return getattr(sys.modules[mod_str], class_str)
     except AttributeError:
-        raise ImportError(
+        raise SynergyError(
             'Class %s cannot be found (%s)' %
             (class_str, traceback.format_exception(*sys.exc_info())))
 
@@ -52,7 +54,7 @@ def objectHookHandler(json_dict):
             objClass = import_class(synergy_object["name"])
             objInstance = objClass()
             return objInstance.deserialize(json_dict)
-        except Exception as ex:
+        except SynergyError as ex:
             raise ex
     else:
         return json_dict
