@@ -1,6 +1,8 @@
 from datetime import datetime
 from json import JSONEncoder
 from synergy.common import utils
+from synergy.exception import SynergyError
+
 
 __author__ = "Lisa Zangrando"
 __email__ = "lisa.zangrando[AT]pd.infn.it"
@@ -66,26 +68,26 @@ class SynergyObject(object):
     @classmethod
     def deserialize(cls, entity):
         if "synergy_object" not in entity:
-            raise Exception("it seems not a Synergy object!")
+            raise SynergyError("it seems not a Synergy object!")
 
         synergy_object = entity["synergy_object"]
 
         if "namespace" not in synergy_object:
-            raise Exception("synergy_object.namespace not defined!")
+            raise SynergyError("synergy_object.namespace not defined!")
 
         if "name" not in synergy_object:
-            raise Exception("synergy_object.name not defined!")
+            raise SynergyError("synergy_object.name not defined!")
 
         if "version" not in synergy_object:
-            raise Exception("synergy_object.version mismatch!")
+            raise SynergyError("synergy_object.version mismatch!")
 
         if synergy_object["version"] != cls.VERSION:
-            raise Exception("synergy_object.version mis!")
+            raise SynergyError("synergy_object.version mis!")
 
         if synergy_object["namespace"] != "synergy":
-            raise Exception("unsupported object objtype='%s.%s"
-                            % (synergy_object["namespace"],
-                               synergy_object["name"]))
+            raise SynergyError("unsupported object objtype='%s.%s"
+                               % (synergy_object["namespace"],
+                                  synergy_object["name"]))
 
         objInstance = None
 
@@ -94,8 +96,8 @@ class SynergyObject(object):
             objClass = utils.import_class(objName)
             objInstance = objClass()
         except Exception as ex:
-            raise Exception("error on deserializing the object %r: %s"
-                            % (objName, ex))
+            raise SynergyError("error on deserializing the object %r: %s"
+                               % (objName, ex))
 
         del entity["synergy_object"]
 
