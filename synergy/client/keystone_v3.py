@@ -201,7 +201,7 @@ class Token(object):
     def trust(self, trustee_user, expires_at=None,
               project_id=None, roles=None, impersonation=True):
         if self.isExpired():
-            raise Exception("token expired!")
+            raise ValueError("token expired!")
 
         headers = {"Content-Type": "application/json",
                    "Accept": "application/json",
@@ -227,7 +227,7 @@ class Token(object):
         endpoint = self.getCatalog(service_name="keystone")
 
         if not endpoint:
-            raise Exception("keystone endpoint not found!")
+            raise ValueError("keystone endpoint not found!")
 
         if "v2.0" in endpoint["url"]:
             endpoint["url"] = endpoint["url"].replace("v2.0", "v3")
@@ -240,7 +240,7 @@ class Token(object):
             response.raise_for_status()
 
         if not response.text:
-            raise Exception("trust token failed!")
+            raise ValueError("trust token failed!")
 
         return Trust(response.json())
 
@@ -323,7 +323,7 @@ class KeystoneClient(object):
             response.raise_for_status()
 
         if not response.text:
-            raise Exception("authentication failed!")
+            raise ValueError("authentication failed!")
 
         # print(response.__dict__)
 
@@ -337,8 +337,8 @@ class KeystoneClient(object):
             response = self.getResource("users/%s" % id, "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the user info (id=%r): %s"
-                            % (id, response["error"]["message"]))
+            raise ValueError("error on retrieving the user info (id=%r): %s"
+                             % (id, response["error"]["message"]))
 
         if response:
             response = response["user"]
@@ -350,8 +350,8 @@ class KeystoneClient(object):
             response = self.getResource("users", "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the users list: %s"
-                            % response["error"]["message"])
+            raise ValueError("error on retrieving the users list: %s"
+                             % response["error"]["message"])
 
         if response:
             response = response["users"]
@@ -363,8 +363,8 @@ class KeystoneClient(object):
             response = self.getResource("users/%s/projects" % id, "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the users's projects "
-                            "(id=%r): %s" % (id, response["error"]["message"]))
+            raise ValueError("error on retrieving the users' projects (id"
+                             "=%r): %s" % (id, response["error"]["message"]))
 
         if response:
             response = response["projects"]
@@ -377,10 +377,10 @@ class KeystoneClient(object):
                                         % (project_id, user_id), "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the user's roles (usrId=%r, "
-                            "prjId=%r): %s" % (user_id,
-                                               project_id,
-                                               response["error"]["message"]))
+            raise ValueError("error on retrieving the user's roles (usrId=%r, "
+                             "prjId=%r): %s" % (user_id,
+                                                project_id,
+                                                response["error"]["message"]))
 
         if response:
             response = response["roles"]
@@ -392,8 +392,8 @@ class KeystoneClient(object):
             response = self.getResource("/projects/%s" % id, "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the project (id=%r): %s"
-                            % (id, response["error"]["message"]))
+            raise ValueError("error on retrieving the project (id=%r): %s"
+                             % (id, response["error"]["message"]))
 
         if response:
             response = response["project"]
@@ -405,8 +405,8 @@ class KeystoneClient(object):
             response = self.getResource("/projects", "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the projects list: %s"
-                            % response["error"]["message"])
+            raise ValueError("error on retrieving the projects list: %s"
+                             % response["error"]["message"])
 
         if response:
             response = response["projects"]
@@ -418,8 +418,8 @@ class KeystoneClient(object):
             response = self.getResource("/roles/%s" % id, "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the role info (id=%r): %s"
-                            % (id, response["error"]["message"]))
+            raise ValueError("error on retrieving the role info (id=%r): %s"
+                             % (id, response["error"]["message"]))
 
         if response:
             response = response["role"]
@@ -431,8 +431,8 @@ class KeystoneClient(object):
             response = self.getResource("/roles", "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the roles list: %s"
-                            % response["error"]["message"])
+            raise ValueError("error on retrieving the roles list: %s"
+                             % response["error"]["message"])
 
         if response:
             response = response["roles"]
@@ -483,7 +483,7 @@ class KeystoneClient(object):
             response.raise_for_status()
 
         if not response.text:
-            raise Exception("token not found!")
+            raise ValueError("token not found!")
 
         token_subject = response.headers["X-Subject-Token"]
         token_data = response.json()
@@ -496,8 +496,8 @@ class KeystoneClient(object):
                 response = self.getResource("/endpoints/%s" % id, "GET")
             except requests.exceptions.HTTPError as ex:
                 response = ex.response.json()
-                raise Exception("error on retrieving the endpoint (id=%r): %s"
-                                % (id, response["error"]["message"]))
+                raise ValueError("error on retrieving the endpoint (id=%r): %s"
+                                 % (id, response["error"]["message"]))
             if response:
                 response = response["endpoint"]
 
@@ -507,9 +507,9 @@ class KeystoneClient(object):
                 endpoints = self.getEndpoints()
             except requests.exceptions.HTTPError as ex:
                 response = ex.response.json()
-                raise Exception("error on retrieving the endpoints list"
-                                "(serviceId=%r): %s"
-                                % (service_id, response["error"]["message"]))
+                raise ValueError("error on retrieving the endpoints list"
+                                 "(serviceId=%r): %s"
+                                 % (service_id, response["error"]["message"]))
 
             if endpoints:
                 for endpoint in endpoints:
@@ -523,8 +523,8 @@ class KeystoneClient(object):
             response = self.getResource("/endpoints", "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the endpoints list: %s"
-                            % response["error"]["message"])
+            raise ValueError("error on retrieving the endpoints list: %s"
+                             % response["error"]["message"])
 
         if response:
             response = response["endpoints"]
@@ -537,8 +537,8 @@ class KeystoneClient(object):
                 response = self.getResource("/services/%s" % id, "GET")
             except requests.exceptions.HTTPError as ex:
                 response = ex.response.json()
-                raise Exception("error on retrieving the service info (id=%r)"
-                                ": %s" % (id, response["error"]["message"]))
+                raise ValueError("error on retrieving the service info (id=%r)"
+                                 ": %s" % (id, response["error"]["message"]))
 
             if response:
                 response = response["service"]
@@ -558,8 +558,8 @@ class KeystoneClient(object):
             response = self.getResource("/services", "GET")
         except requests.exceptions.HTTPError as ex:
             response = ex.response.json()
-            raise Exception("error on retrieving the services list: %s"
-                            % response["error"]["message"])
+            raise ValueError("error on retrieving the services list: %s"
+                             % response["error"]["message"])
 
         if response:
             response = response["services"]
@@ -608,7 +608,7 @@ class KeystoneClient(object):
                                        timeout=self.timeout,
                                        verify=self.ca_cert)
         else:
-            raise Exception("wrong HTTP method: %s" % method)
+            raise ValueError("wrong HTTP method: %s" % method)
 
         if response.status_code != requests.codes.ok:
             response.raise_for_status()
