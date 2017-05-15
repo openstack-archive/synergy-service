@@ -129,16 +129,16 @@ def main():
             synergy_url = bypass_url
         else:
             if not os_username:
-                raise Exception("'os-username' not defined!")
+                raise ValueError("'os-username' not defined!")
 
             if not os_password:
-                raise Exception("'os-password' not defined!")
+                raise ValueError("'os-password' not defined!")
 
             if not os_project_name:
-                raise Exception("'os-project-name' not defined!")
+                raise ValueError("'os-project-name' not defined!")
 
             if not os_auth_url:
-                raise Exception("'os-auth-url' not defined!")
+                raise ValueError("'os-auth-url' not defined!")
 
             if not os_user_domain_name:
                 os_user_domain_name = "default"
