@@ -9,7 +9,7 @@ import time
 
 from eventlet import greenio as eventlet_greenio
 from eventlet import wsgi as eventlet_wsgi
-
+from synergy.exception import SynergyError
 from sys import exc_info
 from traceback import format_tb
 
@@ -216,9 +216,8 @@ class Server(object):
             family = info[0]
             bind_addr = info[-1]
         except Exception as ex:
-            LOG.error("Unable to listen on %s:%s: %s"
-                      % (self.host_name, self.host_port, ex))
-            raise ex
+            raise SynergyError("Unable to listen on %s:%s: %s"
+                               % (self.host_name, self.host_port, ex))
 
         retry_until = time.time() + self.retry_until_window
         exception = None
