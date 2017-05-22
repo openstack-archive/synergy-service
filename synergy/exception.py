@@ -19,3 +19,7 @@ permissions and limitations under the License."""
 
 class SynergyError(Exception):
     pass
+
+
+class AuthorizationError(Exception):
+    pass

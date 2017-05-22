@@ -37,6 +37,10 @@ def import_class(import_str):
             (class_str, traceback.format_exception(*sys.exc_info())))
 
 
+def instantiate_class(class_str):
+    return import_class(class_str)()
+
+
 def objectHookHandler(json_dict):
     for key, value in json_dict.items():
         if isinstance(value, dict):
