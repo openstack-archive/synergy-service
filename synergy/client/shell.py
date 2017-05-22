@@ -124,6 +124,7 @@ def main():
         os_cacert = args.os_cacert
         bypass_url = args.bypass_url
         command_name = args.command_name
+        token = None
 
         if bypass_url:
             synergy_url = bypass_url
@@ -157,15 +158,14 @@ def main():
                 project_domain_id=os_project_domain_id,
                 project_domain_name=os_project_domain_name)
 
-            client.authenticate()
-
+            token = client.authenticate()
             synergy_endpoint = client.getEndpoint("synergy")
-
             synergy_url = synergy_endpoint["url"]
 
         if command_name not in commands:
             print("command %r not found!" % command_name)
 
+        commands[command_name].setToken(token)
         commands[command_name].execute(synergy_url, args)
     except KeyboardInterrupt as e:
         print("Shutting down synergyclient")

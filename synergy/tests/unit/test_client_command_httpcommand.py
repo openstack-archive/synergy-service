@@ -47,5 +47,5 @@ class TestHTTPCommand(base.TestCase):
                 as m:
             result = self.http_command.execute("dummy_url")
 
-        m.assert_called_once_with("dummy_url", params=None)
+        m.assert_called_once_with("dummy_url", headers=None, params=None)
         self.assertEqual({"test": True}, result)

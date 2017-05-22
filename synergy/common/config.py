@@ -21,9 +21,9 @@ permissions and limitations under the License."""
 
 CONF = cfg.CONF
 
-service_opts = [
-    cfg.StrOpt("topic", default="synergy_topic", help="the topic"),
-    cfg.StrOpt("exchange", default="synergy_exchange", help="the exchange"),
+auth_opts = [
+    cfg.StrOpt("plugin", default="noauth", help="the authorization plugin"),
+    cfg.StrOpt("policy_file", default="policy.json", help="the plucy file"),
 ]
 
 wsgi_opts = [
@@ -67,9 +67,9 @@ manager_opts = [
     cfg.IntOpt("rate", default=60)
 ]
 
-cfg.CONF.register_opts(service_opts)
 cfg.CONF.register_opts(wsgi_opts, group="WSGI")
 cfg.CONF.register_opts(logger_opts, group="Logger")
+cfg.CONF.register_opts(auth_opts, group="Authorization")
 
 
 def parseArgs(args=None, usage=None, default_config_files=None):
