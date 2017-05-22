@@ -208,6 +208,11 @@ class KeystoneClient(object):
 
         self.token = Token(token_subject, token_data)
 
+        return self.token
+
+    def getToken(self):
+        return self.token
+
     def getService(self, name):
         for service in self.token.getCatalog():
             if service["name"] == name:
