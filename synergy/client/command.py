@@ -32,11 +32,21 @@ class HTTPCommand(object):
     def getName(self):
         return self.name
 
+    def setToken(self, token):
+        self.token = token
+
     def configureParser(self, subparser):
         raise NotImplementedError("not implemented!")
 
     def execute(self, synergy_url, payload=None):
-        request = requests.get(synergy_url, params=payload)
+        headers = None
+        if self.token:
+            headers = {"Content-Type": "application/json",
+                       "Accept": "application/json",
+                       "User-Agent": "synergy_client",
+                       "X-Auth-Token": self.token.getId()}
+
+        request = requests.get(synergy_url, headers=headers, params=payload)
         request.raise_for_status()
 
         try:

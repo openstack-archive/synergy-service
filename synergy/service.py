@@ -12,10 +12,12 @@ from pkg_resources import iter_entry_points
 from oslo_config import cfg
 
 from synergy.common import config
+from synergy.common import utils
 from synergy.common.manager import Manager
 from synergy.common.serializer import SynergyEncoder
 from synergy.common.service import Service
 from synergy.common.wsgi import Server
+from synergy.exception import AuthorizationError
 from synergy.exception import SynergyError
 
 
@@ -91,9 +93,17 @@ class Synergy(Service):
 
         self.managers = {}
         self.wsgi_server = None
+        self.auth_plugin = CONF.Authorization.plugin
+
+        if self.auth_plugin == "noauth":
+            LOG.info("the authorization is disabled!")
+            self.auth_plugin = None
+        else:
+            LOG.info("loading the auth_plugin %s" % self.auth_plugin)
+            self.auth_plugin = utils.instantiate_class(self.auth_plugin)
 
         for entry in iter_entry_points(MANAGER_ENTRY_POINT):
-            LOG.info("loading manager %s", entry.name)
+            LOG.info("loading the %s manager", entry.name)
 
             try:
                 CONF.register_opts(config.manager_opts, group=entry.name)
@@ -143,6 +153,27 @@ class Synergy(Service):
 
         self.saved_args, self.saved_kwargs = args, kwargs
 
+    def authorizationRequired(f):
+        def wrapper(self, *args, **kw):
+            if self.auth_plugin:
+                try:
+                    context = args[0]
+                    context["managers"] = self.managers
+                    query = context.get("QUERY_STRING", None)
+
+                    if query:
+                        context.update(parse_qs(query))
+
+                    self.auth_plugin.authorize(context)
+                except AuthorizationError as ex:
+                    args[1]("401 Unauthorized", [("Content-Type", "text/plain")])
+                    return [ex.message]
+
+            return f(self, *args, **kw)  # Call hello
+
+        return wrapper
+
+    @authorizationRequired
     def listManagers(self, environ, start_response):
         result = []
 
@@ -156,6 +187,7 @@ class Synergy(Service):
         start_response("200 OK", [("Content-Type", "text/html")])
         return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
+    @authorizationRequired
     def getManagerStatus(self, environ, start_response):
         manager_list = None
         result = []
@@ -194,10 +226,10 @@ class Synergy(Service):
         start_response("200 OK", [("Content-Type", "text/html")])
         return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
+    @authorizationRequired
     def executeCommand(self, environ, start_response):
         manager_name = None
         command = None
-
         query = environ.get("QUERY_STRING", None)
 
         if not query:
@@ -251,6 +283,7 @@ class Synergy(Service):
                            [("Content-Type", "text/plain")])
             return ["error: %s" % ex]
 
+    @authorizationRequired
     def startManager(self, environ, start_response):
         manager_list = None
         result = []
@@ -308,10 +341,10 @@ class Synergy(Service):
         start_response("200 OK", [("Content-Type", "text/html")])
         return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
+    @authorizationRequired
     def stopManager(self, environ, start_response):
         manager_list = None
         result = []
-
         query = environ.get("QUERY_STRING", None)
 
         if not query:
