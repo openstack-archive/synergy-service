@@ -80,25 +80,24 @@ class ManagerCommand(HTTPCommand):
             "status", add_help=True, help="show the managers status")
 
         status_parser.add_argument(
-            "manager", nargs='*', help="one or more manager name")
+            "manager", nargs='?', default=None, help="at most one manager")
 
         start_parser = manager_parsers.add_parser(
             "start", add_help=True, help="start the manager")
 
-        start_parser.add_argument(
-            "manager", nargs='+', help="one or more manager name")
+        start_parser.add_argument("manager", help="the manager to start")
 
         stop_parser = manager_parsers.add_parser(
             "stop", add_help=True, help="stop the manager")
 
         stop_parser.add_argument(
-            "manager", nargs='+', help="one or more manager name")
+            "manager", help="the manager to stop")
 
     def execute(self, synergy_url, args=None):
         table = []
         headers = []
         url = synergy_url
-
+ 
         if args.command == "list":
             headers.append("manager")
             url += "/synergy/list"
@@ -113,21 +112,19 @@ class ManagerCommand(HTTPCommand):
             headers.append("rate (min)")
             url += "/synergy/" + args.command
 
-            managers = super(ManagerCommand, self).execute(
+            result = super(ManagerCommand, self).execute(
                 url, {"manager": args.manager})
 
             if args.command == "status":
-                for manager in managers:
+                for manager in result:
                     table.append([manager.getName(),
                                   manager.getStatus(),
                                   manager.getRate()])
             else:
-                for manager in managers:
-                    msg = manager.get("message")
-
-                    table.append([manager.getName(),
-                                  manager.getStatus() + " (%s)" % msg,
-                                  manager.getRate()])
+                msg = result.get("message")
+                table.append([result.getName(),
+                              result.getStatus() + " (%s)" % msg,
+                              result.getRate()])
 
         print(tabulate(table, headers, tablefmt="fancy_grid"))
 

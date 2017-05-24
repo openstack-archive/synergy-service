@@ -167,14 +167,14 @@ def main():
 
         commands[command_name].setToken(token)
         commands[command_name].execute(synergy_url, args)
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("Shutting down synergyclient")
         sys.exit(1)
-    except requests.exceptions.HTTPError as e:
-        print("HTTPError: %s" % e.response._content)
+    except requests.exceptions.HTTPError as ex:
+        print(ex.response._content)
         sys.exit(1)
-    except Exception as e:
-        print("ERROR: %s" % e)
+    except Exception as ex:
+        print(ex)
         sys.exit(1)
 
 
