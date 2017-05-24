@@ -75,7 +75,17 @@ class SynergyTests(unittest.TestCase):
     @mock.patch('synergy.service.LOG', LOG)
     def test_getManagerStatus(self):
         start_response = Mock()
-        result = self.synergy.getManagerStatus(environ={},
+        environ = {}
+        result = self.synergy.getManagerStatus(environ,
+                                               start_response=start_response)
+
+        result = json.loads(result[0], object_hook=objectHookHandler)
+
+        self.assertEqual(result[0].getStatus(), 'ACTIVE')
+
+        environ = {'QUERY_STRING': 'manager=TimerManager'}
+
+        result = self.synergy.getManagerStatus(environ,
                                                start_response=start_response)
 
         result = json.loads(result[0], object_hook=objectHookHandler)
@@ -89,23 +99,23 @@ class SynergyTests(unittest.TestCase):
 
         result = self.synergy.startManager(environ, start_response)
 
-        self.assertEqual(result[0], "manager 'NONE' not found!")
+        self.assertEqual(result, "manager NONE not found!")
 
         environ = {'QUERY_STRING': 'manager=TimerManager'}
 
         result = self.synergy.startManager(environ, start_response)
-        result = json.loads(result[0], object_hook=objectHookHandler)
+        result = json.loads(result, object_hook=objectHookHandler)
 
-        self.assertEqual(result[0].getStatus(), 'RUNNING')
-        self.assertEqual(result[0].get("message"), 'started successfully')
+        self.assertEqual(result.getStatus(), 'RUNNING')
+        self.assertEqual(result.get("message"), 'started successfully')
 
         time.sleep(0.5)
 
         result = self.synergy.startManager(environ, start_response)
-        result = json.loads(result[0], object_hook=objectHookHandler)
+        result = json.loads(result, object_hook=objectHookHandler)
 
-        self.assertEqual(result[0].getStatus(), 'RUNNING')
-        self.assertEqual(result[0].get("message"), 'WARN: already started')
+        self.assertEqual(result.getStatus(), 'RUNNING')
+        self.assertEqual(result.get("message"), 'WARN: already started')
 
     @mock.patch('synergy.service.LOG', LOG)
     def test_stopManager(self):
@@ -114,23 +124,25 @@ class SynergyTests(unittest.TestCase):
 
         result = self.synergy.startManager(environ, stop_response)
 
-        self.assertEqual(result[0], "manager 'NONE' not found!")
+        self.assertEqual(result, "manager NONE not found!")
 
         environ = {'QUERY_STRING': 'manager=TimerManager'}
 
         result = self.synergy.startManager(environ, stop_response)
-        result = json.loads(result[0], object_hook=objectHookHandler)
+        result = json.loads(result, object_hook=objectHookHandler)
 
         time.sleep(0.5)
 
         result = self.synergy.stopManager(environ, stop_response)
-        result = json.loads(result[0], object_hook=objectHookHandler)
+        result = json.loads(result, object_hook=objectHookHandler)
 
-        self.assertEqual(result[0].getStatus(), 'ACTIVE')
+        self.assertEqual(result.getStatus(), 'ACTIVE')
 
     @mock.patch('synergy.service.LOG', LOG)
     def test_executeCommand(self):
-        environ = {'QUERY_STRING': 'manager=TimerManager&command=GET_TIME'}
+        environ = {'QUERY_STRING':
+                   'manager=TimerManager&args=%7B%22id%22%3A'
+                   '+null%2C+%22name%22%3A+%22prj_a%22%7D&command=GET_TIME'}
         start_response = Mock()
 
         result = self.synergy.executeCommand(environ, start_response)

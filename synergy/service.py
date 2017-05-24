@@ -153,15 +153,58 @@ class Synergy(Service):
 
         self.saved_args, self.saved_kwargs = args, kwargs
 
-    def authorizationRequired(f):
+    def parseParameters(f):
+        def wrapper(self, *args, **kw):
+            context = args[0]
+
+            query = context.get("QUERY_STRING", None)
+
+            if query:
+                parameters = parse_qs(query)
+
+                for key in parameters:
+                    value = escape(parameters[key][0])
+                    value = value.replace("'", "\"")
+
+                    try:
+                        value = json.loads(value)
+                    except ValueError:
+                        pass
+
+                    context[key] = value
+
+            return f(self, *args, **kw)
+
+        return wrapper
+
+    def checkParameters(paremeters):
+        def check(f):
+            def wrapper(self, *args, **kw):
+                context = args[0]
+                start_response = args[1]
+
+                for parameter in paremeters:
+                    value = context.get(parameter, None)
+
+                    if not value:
+                        start_response("400 BAD REQUEST",
+                                       [("Content-Type", "text/plain")])
+                        return "parameter %s not found!" % parameter
+
+                    if parameter == "manager" and value not in self.managers:
+                        start_response("404 NOT FOUND",
+                                       [("Content-Type", "text/plain")])
+                        return "manager %s not found!" % value
+
+                return f(self, *args, **kw)
+            return wrapper
+        return check
+
+    def authorize(f):
         def wrapper(self, *args, **kw):
             if self.auth_plugin:
                 context = args[0]
                 context["managers"] = self.managers
-                query = context.get("QUERY_STRING", None)
-
-                if query:
-                    context.update(parse_qs(query))
 
                 try:
                     self.auth_plugin.authorize(context)
@@ -174,7 +217,7 @@ class Synergy(Service):
 
         return wrapper
 
-    @authorizationRequired
+    @authorize
     def listManagers(self, environ, start_response):
         result = []
 
@@ -188,23 +231,21 @@ class Synergy(Service):
         start_response("200 OK", [("Content-Type", "text/html")])
         return ["%s" % json.dumps(result, cls=SynergyEncoder)]
 
-    @authorizationRequired
+    @parseParameters
+    @authorize
     def getManagerStatus(self, environ, start_response):
+        manager_name = environ.get("manager", None)
+
         manager_list = None
         result = []
 
-        query = environ.get("QUERY_STRING", None)
+        if manager_name:
+            if manager_name not in self.managers:
+                start_response("404 NOT FOUND",
+                               [("Content-Type", "text/plain")])
+                return "manager %s not found!" % manager_name
 
-        if query:
-            parameters = parse_qs(query)
-
-            if "manager" in parameters:
-                if isinstance(parameters['manager'], (list, tuple)):
-                    manager_list = parameters['manager']
-                else:
-                    manager_list = [parameters['manager']]
-            else:
-                manager_list = self.managers.keys()
+            manager_list = [manager_name]
         else:
             manager_list = self.managers.keys()
 
@@ -220,184 +261,94 @@ class Synergy(Service):
 
                 result.append(m)
 
-        if len(manager_list) == 1 and len(result) == 0:
-            start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %s not found!" % manager_list[0]]
-
         start_response("200 OK", [("Content-Type", "text/html")])
-        return ["%s" % json.dumps(result, cls=SynergyEncoder)]
+        return [json.dumps(result, cls=SynergyEncoder)]
 
-    @authorizationRequired
+    @parseParameters
+    @checkParameters(["manager", "command", "args"])
+    @authorize
     def executeCommand(self, environ, start_response):
-        manager_name = None
-        command = None
-        query = environ.get("QUERY_STRING", None)
-
-        if not query:
-            start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
-            return ["bad request"]
-
-        parameters = parse_qs(query)
-        LOG.debug("execute command: parameters=%s" % parameters)
-
-        if "manager" not in parameters:
-            start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
-            return ["manager not specified!"]
-
-        manager_name = escape(parameters['manager'][0])
-
-        if manager_name not in self.managers:
-            start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %s not found!" % manager_name]
-
-        if "command" not in parameters:
-            start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
-            return ["bad request"]
-
-        command = escape(parameters['command'][0])
-
-        if "args" in parameters:
-            manager_args = escape(parameters['args'][0])
-            manager_args = manager_args.replace("'", "\"")
-            manager_args = json.loads(manager_args)
-        else:
-            manager_args = {}
-
+        manager_name = environ["manager"]
         manager = self.managers[manager_name]
+        manager_args = environ["args"]
+        command = environ["command"]
 
         try:
             result = manager.execute(command=command, **manager_args)
 
             start_response("200 OK", [("Content-Type", "text/html")])
-            return ["%s" % json.dumps(result, cls=SynergyEncoder)]
+            return [json.dumps(result, cls=SynergyEncoder)]
         except NotImplementedError:
             message = "execute() not implemented!"
 
             LOG.error(message)
             start_response("500 INTERNAL SERVER ERROR",
                            [("Content-Type", "text/plain")])
-            return ["error: %s" % message]
+            return message
 
         except SynergyError as ex:
             LOG.debug("execute command: error=%s" % ex)
+
             start_response("500 INTERNAL SERVER ERROR",
                            [("Content-Type", "text/plain")])
-            return ["error: %s" % ex]
+            return "%s" % ex
 
-    @authorizationRequired
+    @parseParameters
+    @checkParameters(["manager"])
+    @authorize
     def startManager(self, environ, start_response):
-        manager_list = None
-        result = []
+        manager_name = environ["manager"]
+        manager = self.managers[manager_name]
+        result = Manager(manager_name)
+        result.setRate(manager.getRate())
 
-        query = environ.get("QUERY_STRING", None)
+        if manager.getStatus() == "ACTIVE":
+            LOG.info("starting the %s manager" % (manager_name))
 
-        if not query:
-            start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
-            return ["bad request"]
+            manager.resume()
 
-        parameters = parse_qs(query)
+            LOG.info("%s manager started! (rate=%s min)"
+                     % (manager_name, manager.getRate()))
 
-        if "manager" not in parameters:
-            start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
-            return ["manager not specified!"]
-
-        if isinstance(parameters['manager'], (list, tuple)):
-            manager_list = parameters['manager']
-        else:
-            manager_list = [parameters['manager']]
-
-        for manager_name in manager_list:
-            manager_name = escape(manager_name)
-
-            if manager_name not in self.managers:
-                continue
-
-            manager = self.managers[manager_name]
-            m = Manager(manager_name)
-            m.setRate(manager.getRate())
-
-            result.append(m)
-
-            if manager.getStatus() == "ACTIVE":
-                LOG.info("starting the %s manager" % (manager_name))
-
-                manager.resume()
-
-                LOG.info("%s manager started! (rate=%s min)"
-                         % (manager_name, manager.getRate()))
-
-                m.setStatus("RUNNING")
-                m.set("message", "started successfully")
-            elif manager.getStatus() == "RUNNING":
-                m.setStatus("RUNNING")
-                m.set("message", "WARN: already started")
-            elif manager.getStatus() == "ERROR":
-                m.setStatus("ERROR")
-                m.set("message", "wrong state")
-
-        if len(manager_list) == 1 and len(result) == 0:
-            start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %r not found!" % manager_list[0]]
+            result.setStatus("RUNNING")
+            result.set("message", "started successfully")
+        elif manager.getStatus() == "RUNNING":
+            result.setStatus("RUNNING")
+            result.set("message", "WARN: already started")
+        elif manager.getStatus() == "ERROR":
+            result.setStatus("ERROR")
+            result.set("message", "wrong state")
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return ["%s" % json.dumps(result, cls=SynergyEncoder)]
+        return json.dumps(result, cls=SynergyEncoder)
 
-    @authorizationRequired
+    @parseParameters
+    @checkParameters(["manager"])
+    @authorize
     def stopManager(self, environ, start_response):
-        manager_list = None
-        result = []
-        query = environ.get("QUERY_STRING", None)
+        manager_name = environ["manager"]
+        manager = self.managers[manager_name]
+        result = Manager(manager_name)
+        result.setRate(manager.getRate())
 
-        if not query:
-            start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
-            return ["bad request"]
+        if manager.getStatus() == "RUNNING":
+            LOG.info("stopping the %s manager" % (manager_name))
 
-        parameters = parse_qs(query)
+            manager.pause()
 
-        if "manager" not in parameters:
-            start_response("400 BAD REQUEST", [("Content-Type", "text/plain")])
-            return ["manager not specified!"]
+            LOG.info("%s manager stopped!" % (manager_name))
 
-        if isinstance(parameters['manager'], (list, tuple)):
-            manager_list = parameters['manager']
-        else:
-            manager_list = [parameters['manager']]
-
-        for manager_name in manager_list:
-            manager_name = escape(manager_name)
-
-            if manager_name not in self.managers:
-                continue
-
-            manager = self.managers[manager_name]
-
-            m = Manager(manager_name)
-            m.setRate(manager.getRate())
-
-            result.append(m)
-
-            if manager.getStatus() == "RUNNING":
-                LOG.info("stopping the %s manager" % (manager_name))
-
-                manager.pause()
-
-                LOG.info("%s manager stopped!" % (manager_name))
-
-                m.setStatus("ACTIVE")
-                m.set("message", "stopped successfully")
-            elif manager.getStatus() == "ACTIVE":
-                m.setStatus("ACTIVE")
-                m.set("message", "WARN: already stopped")
-            elif manager.getStatus() == "ERROR":
-                m.setStatus("ERROR")
-                m.set("message", "wrong state")
-
-        if len(manager_list) == 1 and len(result) == 0:
-            start_response("404 NOT FOUND", [("Content-Type", "text/plain")])
-            return ["manager %r not found!" % manager_list[0]]
+            result.setStatus("ACTIVE")
+            result.set("message", "stopped successfully")
+        elif manager.getStatus() == "ACTIVE":
+            result.setStatus("ACTIVE")
+            result.set("message", "WARN: already stopped")
+        elif manager.getStatus() == "ERROR":
+            result.setStatus("ERROR")
+            result.set("message", "wrong state")
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return ["%s" % json.dumps(result, cls=SynergyEncoder)]
+        return json.dumps(result, cls=SynergyEncoder)
 
     def start(self):
         self.model_disconnected = False

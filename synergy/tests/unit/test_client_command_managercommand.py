@@ -49,22 +49,22 @@ class TestManagerCommand(base.TestCase):
 
         # manager status
         res = root_parser.parse_args(["manager", "status"])
-        ns = Namespace(command_name="manager", command="status", manager=[])
+        ns = Namespace(command_name="manager", command="status", manager=None)
         self.assertEqual(ns, res)
 
         res = root_parser.parse_args(["manager", "status", "TestManager"])
         ns = Namespace(
             command_name="manager",
             command="status",
-            manager=["TestManager"])
+            manager="TestManager")
         self.assertEqual(ns, res)
 
         res = root_parser.parse_args(
-            ["manager", "status", "Test1", "Test2", "Test3"])
+            ["manager", "status", "Test1"])
         ns = Namespace(
             command_name="manager",
             command="status",
-            manager=["Test1", "Test2", "Test3"])
+            manager="Test1")
         self.assertEqual(ns, res)
 
         # manager start
@@ -77,15 +77,15 @@ class TestManagerCommand(base.TestCase):
         ns = Namespace(
             command_name="manager",
             command="start",
-            manager=["TestManager"])
+            manager="TestManager")
         self.assertEqual(ns, res)
 
         res = root_parser.parse_args(
-            ["manager", "start", "Test1", "Test2"])
+            ["manager", "start", "Test1"])
         ns = Namespace(
             command_name="manager",
             command="start",
-            manager=["Test1", "Test2"])
+            manager="Test1")
         self.assertEqual(ns, res)
 
         # manager stop
@@ -98,15 +98,15 @@ class TestManagerCommand(base.TestCase):
         ns = Namespace(
             command_name="manager",
             command="stop",
-            manager=["TestManager"])
+            manager="TestManager")
         self.assertEqual(ns, res)
 
         res = root_parser.parse_args(
-            ["manager", "stop", "Test1", "Test2"])
+            ["manager", "stop", "Test1"])
         ns = Namespace(
             command_name="manager",
             command="stop",
-            manager=["Test1", "Test2"])
+            manager="Test1")
         self.assertEqual(ns, res)
 
     @mock.patch('synergy.client.command.tabulate')
@@ -204,50 +204,12 @@ class TestManagerCommand(base.TestCase):
             tablefmt="fancy_grid")
 
     @mock.patch('synergy.client.command.tabulate')
-    def test_execute_status_two_managers(self, mock_tabulate):
-        """Check the CLI output of "manager status ManagerA ManagerB"."""
-        # Mock the parser call
-        mock_parser = mock.Mock()
-        mock_parser.args.command = "status"
-        mock_parser.args.manager = ["ManagerA", "ManagerB"]
-
-        # Mock 2 managers and their statuses
-        manager_a = mock.Mock()
-        manager_a.getName.return_value = "ManagerA"
-        manager_a.getStatus.return_value = "UP"
-        manager_a.getRate.return_value = 5
-        manager_b = mock.Mock()
-        manager_b.getName.return_value = "ManagerB"
-        manager_b.getStatus.return_value = "DOWN"
-        manager_b.getRate.return_value = 10
-        mgrs = [manager_a, manager_b]
-
-        # Execute "manager status ManagerA ManagerB"
-        with mock.patch.object(HTTPCommand, 'execute', return_value=mgrs) as m:
-            self.manager_command.execute(synergy_url="", args=mock_parser.args)
-
-        # Check the executed call
-        m.assert_called_once_with(
-            "/synergy/status",
-            {"manager": ["ManagerA", "ManagerB"]})
-
-        # Check the data when we call tabulate
-        headers = ["manager", "status", "rate (min)"]
-        table = [
-            ["ManagerA", "UP", 5],
-            ["ManagerB", "DOWN", 10]]
-        mock_tabulate.assert_called_once_with(
-            table,
-            headers,
-            tablefmt="fancy_grid")
-
-    @mock.patch('synergy.client.command.tabulate')
-    def test_execute_start_one_manager(self, mock_tabulate):
+    def test_execute_start_manager(self, mock_tabulate):
         """Check the CLI output of "manager start ManagerA"."""
         # Mock the parser call
         mock_parser = mock.Mock()
         mock_parser.args.command = "start"
-        mock_parser.args.manager = ["ManagerA"]
+        mock_parser.args.manager = "ManagerA"
 
         # Mock a manager
         manager_a = mock.Mock()
@@ -255,7 +217,7 @@ class TestManagerCommand(base.TestCase):
         manager_a.getStatus.return_value = "RUNNING"
         manager_a.get.return_value = "started successfully"
         manager_a.getRate.return_value = 1
-        mgrs = [manager_a]
+        mgrs = manager_a
 
         # Execute "manager start ManagerA"
         with mock.patch.object(HTTPCommand, 'execute', return_value=mgrs) as m:
@@ -264,7 +226,7 @@ class TestManagerCommand(base.TestCase):
         # Check the executed call to "manager start ManagerA"
         m.assert_called_once_with(
             "/synergy/start",
-            {"manager": ["ManagerA"]})
+            {"manager": "ManagerA"})
 
         # Check the data when we call tabulate
         headers = ["manager", "status", "rate (min)"]
@@ -275,52 +237,12 @@ class TestManagerCommand(base.TestCase):
             tablefmt="fancy_grid")
 
     @mock.patch('synergy.client.command.tabulate')
-    def test_execute_start_two_managers(self, mock_tabulate):
-        """Check the CLI output of "manager start ManagerA ManagerB"."""
-        # Mock the parser call
-        mock_parser = mock.Mock()
-        mock_parser.args.command = "start"
-        mock_parser.args.manager = ["ManagerA", "ManagerB"]
-
-        # Mock 2 managers
-        manager_a = mock.Mock()
-        manager_a.getName.return_value = "ManagerA"
-        manager_a.getStatus.return_value = "RUNNING"
-        manager_a.get.return_value = "started successfully"
-        manager_a.getRate.return_value = 1
-        manager_b = mock.Mock()
-        manager_b.getName.return_value = "ManagerB"
-        manager_b.getStatus.return_value = "RUNNING"
-        manager_b.get.return_value = "started successfully"
-        manager_b.getRate.return_value = 4
-        mgrs = [manager_a, manager_b]
-
-        # Execute "manager start ManagerA ManagerB"
-        with mock.patch.object(HTTPCommand, 'execute', return_value=mgrs) as m:
-            self.manager_command.execute(synergy_url='', args=mock_parser.args)
-
-        # Check the executed call to "manager start ManagerA ManagerB"
-        m.assert_called_once_with(
-            "/synergy/start",
-            {"manager": ["ManagerA", "ManagerB"]})
-
-        # Check the data when we call tabulate
-        headers = ["manager", "status", "rate (min)"]
-        table = [
-            ["ManagerA", "RUNNING (started successfully)", 1],
-            ["ManagerB", "RUNNING (started successfully)", 4]]
-        mock_tabulate.assert_called_once_with(
-            table,
-            headers,
-            tablefmt="fancy_grid")
-
-    @mock.patch('synergy.client.command.tabulate')
-    def test_execute_stop_one_manager(self, mock_tabulate):
+    def test_execute_stop_manager(self, mock_tabulate):
         """Check the CLI output of "manager stop ManagerA"."""
         # Mock the parser call
         mock_parser = mock.Mock()
         mock_parser.args.command = "stop"
-        mock_parser.args.manager = ["ManagerA"]
+        mock_parser.args.manager = "ManagerA"
 
         # Mock a manager
         manager_a = mock.Mock()
@@ -328,7 +250,7 @@ class TestManagerCommand(base.TestCase):
         manager_a.getStatus.return_value = "ACTIVE"
         manager_a.get.return_value = "stopped successfully"
         manager_a.getRate.return_value = 1
-        mgrs = [manager_a]
+        mgrs = manager_a
 
         # Execute "manager stop ManagerA"
         with mock.patch.object(HTTPCommand, 'execute', return_value=mgrs) as m:
@@ -337,51 +259,11 @@ class TestManagerCommand(base.TestCase):
         # Check the executed call to "manager stop ManagerA"
         m.assert_called_once_with(
             "/synergy/stop",
-            {"manager": ["ManagerA"]})
+            {"manager": "ManagerA"})
 
         # Check the data when we call tabulate
         headers = ["manager", "status", "rate (min)"]
         table = [["ManagerA", "ACTIVE (stopped successfully)", 1]]
-        mock_tabulate.assert_called_once_with(
-            table,
-            headers,
-            tablefmt="fancy_grid")
-
-    @mock.patch('synergy.client.command.tabulate')
-    def test_execute_stop_two_managers(self, mock_tabulate):
-        """Check the CLI output of "manager stop ManagerA ManagerB"."""
-        # Mock the parser call
-        mock_parser = mock.Mock()
-        mock_parser.args.command = "stop"
-        mock_parser.args.manager = ["ManagerA", "ManagerB"]
-
-        # Mock 2 managers
-        manager_a = mock.Mock()
-        manager_a.getName.return_value = "ManagerA"
-        manager_a.getStatus.return_value = "ACTIVE"
-        manager_a.get.return_value = "stopped successfully"
-        manager_a.getRate.return_value = 1
-        manager_b = mock.Mock()
-        manager_b.getName.return_value = "ManagerB"
-        manager_b.getStatus.return_value = "ACTIVE"
-        manager_b.get.return_value = "stopped successfully"
-        manager_b.getRate.return_value = 4
-        mgrs = [manager_a, manager_b]
-
-        # Execute "manager stop ManagerA ManagerB"
-        with mock.patch.object(HTTPCommand, 'execute', return_value=mgrs) as m:
-            self.manager_command.execute(synergy_url='', args=mock_parser.args)
-
-        # Check the executed call to "manager start ManagerA ManagerB"
-        m.assert_called_once_with(
-            "/synergy/stop",
-            {"manager": ["ManagerA", "ManagerB"]})
-
-        # Check the data when we call tabulate
-        headers = ["manager", "status", "rate (min)"]
-        table = [
-            ["ManagerA", "ACTIVE (stopped successfully)", 1],
-            ["ManagerB", "ACTIVE (stopped successfully)", 4]]
         mock_tabulate.assert_called_once_with(
             table,
             headers,
