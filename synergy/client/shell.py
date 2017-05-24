@@ -1,10 +1,12 @@
 import os
 import os.path
-import requests
 import sys
 
 from argparse import ArgumentParser
 from pkg_resources import iter_entry_points
+from requests.exceptions import ConnectionError
+from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 from synergy.client import keystone_v3
 
 __author__ = "Lisa Zangrando"
@@ -167,14 +169,14 @@ def main():
 
         commands[command_name].setToken(token)
         commands[command_name].execute(synergy_url, args)
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("Shutting down synergyclient")
         sys.exit(1)
-    except requests.exceptions.HTTPError as e:
-        print("HTTPError: %s" % e.response._content)
+    except (RequestException, ConnectionError, HTTPError) as ex:
+        print("connection to %s failed!" % synergy_url)
         sys.exit(1)
-    except Exception as e:
-        print("ERROR: %s" % e)
+    except Exception as ex:
+        print(ex.message)
         sys.exit(1)
 
 
