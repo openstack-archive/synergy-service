@@ -162,6 +162,15 @@ class TestHTTPCommand(base.TestCase):
     def test_bypass_url(self, mock_argv, mock_httpcmd):
         """Filling bypass-url should set other params as defaults."""
         args = [
+            '--os-username', 'username',
+            '--os-password', 'password',
+            '--os-user-domain-id', 'user_domain_id',
+            '--os-user-domain-name', 'user_domain_name',
+            '--os-project-name', 'project_name',
+            '--os-project-domain-id', 'project_domain_id',
+            '--os-project-domain-name', 'project_domain_name',
+            '--os-cacert', 'cacert',
+            '--os-auth-url', 'auth_url',
             '--bypass-url', 'bypass_url',
             'manager', 'list']
         mock_argv.__getitem__.return_value = args
@@ -174,14 +183,14 @@ class TestHTTPCommand(base.TestCase):
             command='list',
             command_name='manager',
             debug=False,
-            os_auth_url=None,
-            os_cacert=None,
-            os_password=None,
-            os_project_domain_id=None,
-            os_project_domain_name=None,
+            os_auth_url='auth_url',
+            os_cacert='cacert',
+            os_password='password',
+            os_project_domain_id='project_domain_id',
+            os_project_domain_name='project_domain_name',
             os_project_id=None,
-            os_project_name=None,
-            os_user_domain_id=None,
-            os_user_domain_name=None,
-            os_username=None)
+            os_project_name='project_name',
+            os_user_domain_id='user_domain_id',
+            os_user_domain_name='user_domain_name',
+            os_username='username')
         mock_httpcmd.assert_called_once_with("bypass_url", ns)
