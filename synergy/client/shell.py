@@ -128,55 +128,65 @@ def main():
         command_name = args.command_name
         token = None
 
+        if not os_username:
+            raise ValueError("'os-username' not defined!")
+
+        if not os_password:
+            raise ValueError("'os-password' not defined!")
+
+        if not os_project_name:
+            raise ValueError("'os-project-name' not defined!")
+
+        if not os_auth_url:
+            raise ValueError("'os-auth-url' not defined!")
+
+        if not os_user_domain_name:
+            os_user_domain_name = "default"
+
+        if not os_project_domain_name:
+            os_project_domain_name = "default"
+
+        client = keystone_v3.KeystoneClient(
+            auth_url=os_auth_url,
+            username=os_username,
+            password=os_password,
+            ca_cert=os_cacert,
+            user_domain_id=os_user_domain_id,
+            user_domain_name=os_user_domain_name,
+            project_name=os_project_name,
+            project_domain_id=os_project_domain_id,
+            project_domain_name=os_project_domain_name)
+
+        token = client.authenticate()
+
         if bypass_url:
             synergy_url = bypass_url
         else:
-            if not os_username:
-                raise ValueError("'os-username' not defined!")
-
-            if not os_password:
-                raise ValueError("'os-password' not defined!")
-
-            if not os_project_name:
-                raise ValueError("'os-project-name' not defined!")
-
-            if not os_auth_url:
-                raise ValueError("'os-auth-url' not defined!")
-
-            if not os_user_domain_name:
-                os_user_domain_name = "default"
-
-            if not os_project_domain_name:
-                os_project_domain_name = "default"
-
-            client = keystone_v3.KeystoneClient(
-                auth_url=os_auth_url,
-                username=os_username,
-                password=os_password,
-                ca_cert=os_cacert,
-                user_domain_id=os_user_domain_id,
-                user_domain_name=os_user_domain_name,
-                project_name=os_project_name,
-                project_domain_id=os_project_domain_id,
-                project_domain_name=os_project_domain_name)
-
-            token = client.authenticate()
             synergy_endpoint = client.getEndpoint("synergy")
             synergy_url = synergy_endpoint["url"]
 
         if command_name not in commands:
-            print("command %r not found!" % command_name)
+            print("Command %r not found!" % command_name)
 
         commands[command_name].setToken(token)
         commands[command_name].execute(synergy_url, args)
     except KeyboardInterrupt:
         print("Shutting down synergyclient")
         sys.exit(1)
-    except (RequestException, ConnectionError, HTTPError) as ex:
-        print("connection to %s failed!" % synergy_url)
+    except ConnectionError as ex:
+        print("Failed to establish a new connection to %s" % synergy_url)
+        sys.exit(1)
+    except HTTPError as ex:
+        if ex.response._content:
+            print("%s" % ex.response._content)
+        else:
+            print("%s" % ex.message)
+        sys.exit(1)
+    except RequestException as ex:
+        print("%s" % ex.response._content)
         sys.exit(1)
     except Exception as ex:
-        print(ex.message)
+        print(ex)
         sys.exit(1)
 
 
