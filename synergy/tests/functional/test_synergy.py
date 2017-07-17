@@ -99,12 +99,12 @@ class SynergyTests(unittest.TestCase):
 
         result = self.synergy.startManager(environ, start_response)
 
-        self.assertEqual(result, "manager NONE not found!")
+        self.assertEqual(result[0], "manager NONE not found!")
 
         environ = {'QUERY_STRING': 'manager=TimerManager'}
 
         result = self.synergy.startManager(environ, start_response)
-        result = json.loads(result, object_hook=objectHookHandler)
+        result = json.loads(result[0], object_hook=objectHookHandler)
 
         self.assertEqual(result.getStatus(), 'RUNNING')
         self.assertEqual(result.get("message"), 'started successfully')
@@ -112,7 +112,7 @@ class SynergyTests(unittest.TestCase):
         time.sleep(0.5)
 
         result = self.synergy.startManager(environ, start_response)
-        result = json.loads(result, object_hook=objectHookHandler)
+        result = json.loads(result[0], object_hook=objectHookHandler)
 
         self.assertEqual(result.getStatus(), 'RUNNING')
         self.assertEqual(result.get("message"), 'WARN: already started')
@@ -124,17 +124,17 @@ class SynergyTests(unittest.TestCase):
 
         result = self.synergy.startManager(environ, stop_response)
 
-        self.assertEqual(result, "manager NONE not found!")
+        self.assertEqual(result[0], "manager NONE not found!")
 
         environ = {'QUERY_STRING': 'manager=TimerManager'}
 
         result = self.synergy.startManager(environ, stop_response)
-        result = json.loads(result, object_hook=objectHookHandler)
+        result = json.loads(result[0], object_hook=objectHookHandler)
 
         time.sleep(0.5)
 
         result = self.synergy.stopManager(environ, stop_response)
-        result = json.loads(result, object_hook=objectHookHandler)
+        result = json.loads(result[0], object_hook=objectHookHandler)
 
         self.assertEqual(result.getStatus(), 'ACTIVE')
 

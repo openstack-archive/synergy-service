@@ -155,6 +155,9 @@ class Synergy(Service):
 
     def parseParameters(f):
         def wrapper(self, *args, **kw):
+            if not args:
+                return f(self, *args, **kw)
+
             context = args[0]
 
             query = context.get("QUERY_STRING", None)
@@ -177,24 +180,24 @@ class Synergy(Service):
 
         return wrapper
 
-    def checkParameters(paremeters):
+    def checkParameters(parameters):
         def check(f):
             def wrapper(self, *args, **kw):
                 context = args[0]
                 start_response = args[1]
 
-                for parameter in paremeters:
+                for parameter in parameters:
                     value = context.get(parameter, None)
 
                     if not value:
                         start_response("400 BAD REQUEST",
                                        [("Content-Type", "text/plain")])
-                        return "parameter %s not found!" % parameter
+                        return ["parameter %s not found!" % parameter]
 
                     if parameter == "manager" and value not in self.managers:
                         start_response("404 NOT FOUND",
                                        [("Content-Type", "text/plain")])
-                        return "manager %s not found!" % value
+                        return ["manager %s not found!" % value]
 
                 return f(self, *args, **kw)
             return wrapper
@@ -211,7 +214,7 @@ class Synergy(Service):
                 except AuthorizationError as ex:
                     args[1]("401 Unauthorized",
                             [("Content-Type", "text/plain")])
-                    return [ex.message]
+                    return ["%s" % ex.message]
 
             return f(self, *args, **kw)
 
@@ -265,7 +268,7 @@ class Synergy(Service):
         return [json.dumps(result, cls=SynergyEncoder)]
 
     @parseParameters
-    @checkParameters(["manager", "command", "args"])
+    @checkParameters(["manager", "command"])
     @authorize
     def executeCommand(self, environ, start_response):
         manager_name = environ["manager"]
@@ -284,14 +287,14 @@ class Synergy(Service):
             LOG.error(message)
             start_response("500 INTERNAL SERVER ERROR",
                            [("Content-Type", "text/plain")])
-            return message
+            return [message]
 
         except SynergyError as ex:
             LOG.debug("execute command: error=%s" % ex)
 
-            start_response("500 INTERNAL SERVER ERROR",
+            start_response("422 Unprocessable Entity",
                            [("Content-Type", "text/plain")])
-            return "%s" % ex
+            return ["%s" % ex.message]
 
     @parseParameters
     @checkParameters(["manager"])
@@ -320,7 +323,7 @@ class Synergy(Service):
             result.set("message", "wrong state")
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return json.dumps(result, cls=SynergyEncoder)
+        return [json.dumps(result, cls=SynergyEncoder)]
 
     @parseParameters
     @checkParameters(["manager"])
@@ -348,7 +351,7 @@ class Synergy(Service):
             result.set("message", "wrong state")
 
         start_response("200 OK", [("Content-Type", "text/html")])
-        return json.dumps(result, cls=SynergyEncoder)
+        return [json.dumps(result, cls=SynergyEncoder)]
 
     def start(self):
         self.model_disconnected = False
@@ -438,15 +441,12 @@ def main():
                      ", /etc/) and the '--config-file' option!")
 
         setLogger(name="synergy")
+        setLogger(name="oslo.messaging._drivers")
 
         global LOG
-        # LOG = logging.getLogger(None)
 
         LOG = logging.getLogger(__name__)
         LOG.info("Starting Synergy...")
-
-        # set session ID to this process so we can kill group in sigterm
-        # os.setsid()
 
         server = Synergy()
         server.start()
