@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+* Fixes on the authorization mechanism
+* Enhancement in handling the parameters defined in the user request
+* Missing security support
+* Synergy should never raise Exception directly
+* manager.notify() doesn't handle the NotImplementedError exceptions
+* The synergy.log doesn't contain all logged messages
+
+1.5.1
+-----
+
+* Release v1.5.1
 * Update synergy service packaging
 
 1.5.0

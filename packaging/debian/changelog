@@ -1,3 +1,14 @@
+python-synergy-service (1.5.2) unstable; urgency=low
+
+  * Fixes on the authorization mechanism
+  * Enhancement in handling the parameters defined in the user request
+  * Missing security support
+  * Synergy should never raise Exception directly
+  * manager.notify() doesn't handle the NotImplementedError exceptions
+  * The synergy.log doesn't contain all logged messages
+
+ -- Ervin Konomi <ervin.konomi@pd.infn.it>  Tue, 18 Jul 2017 11:05:42 +0200
+
 python-synergy-service (1.5.1) unstable; urgency=low
 
   * Update synergy service packaging

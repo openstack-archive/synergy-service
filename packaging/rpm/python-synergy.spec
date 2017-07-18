@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          1.5.1
+Version:          1.5.2
 Release:          1%{?dist}
 Summary:          Synergy service
 
@@ -85,6 +85,14 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Tue Jul 18 2017 Ervin Konomi <ervin.konomi@pd.infn.it> - 1.5.2-1
+- Fixes on the authorization mechanism
+- Enhancement in handling the parameters defined in the user request
+- Missing security support
+- Synergy should never raise Exception directly
+- manager.notify() doesn't handle the NotImplementedError exceptions
+- The synergy.log doesn't contain all logged messages
+
 * Tue Mar 21 2017 Ervin Konomi <ervin.konomi@pd.infn.it> - 1.5.1-1
 - Update synergy service packaging
 
