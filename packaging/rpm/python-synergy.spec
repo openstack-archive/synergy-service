@@ -2,7 +2,7 @@
 
 Name:             python-synergy-service
 Version:          1.5.2
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          Synergy service
 
 License:          ASL 2.0
@@ -19,9 +19,9 @@ Requires(preun):  systemd
 Requires(postun): systemd
 Requires:         python2-eventlet
 Requires:         python2-oslo-config
-Requires:         python-pbr
+Requires:         python2-pbr
 Requires:         python-dateutil
-Requires:         python-requests
+Requires:         python2-requests
 
 
 %description
@@ -85,6 +85,9 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Mon Aug 21 2017 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 1.5.2-2
+- Update some python requirements to python2-* names
+
 * Tue Jul 18 2017 Ervin Konomi <ervin.konomi@pd.infn.it> - 1.5.2-1
 - Fixes on the authorization mechanism
 - Enhancement in handling the parameters defined in the user request
