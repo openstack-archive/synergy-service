@@ -1,0 +1,10 @@
+Code-Review+2: Ervin <ervin.konomi@pd.infn.it>
+Workflow+1: Ervin <ervin.konomi@pd.infn.it>
+Code-Review+2: Lisa Zangrando <lisa.zangrando@pd.infn.it>
+Workflow+1: Lisa Zangrando <lisa.zangrando@pd.infn.it>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 08 Sep 2017 19:22:06 +0000
+Reviewed-on: https://review.openstack.org/502013
+Project: openstack/synergy-service
+Branch: refs/heads/master
