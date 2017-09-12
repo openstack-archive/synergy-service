@@ -37,7 +37,7 @@ def main():
                                        " OpenStack Synergy API.")
 
         # Global arguments
-        parser.add_argument("--version", action="version", version="v1.1")
+        parser.add_argument("--version", action="version", version="v1.5.3")
 
         parser.add_argument("--debug",
                             default=False,
