@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+* Shell version updated
+* Authorization section updated
+* Update RPM package dependencies
+
+1.5.2
+-----
+
+* Release v1.5.2
 * Fixes on the authorization mechanism
 * Enhancement in handling the parameters defined in the user request
 * Missing security support
@@ -19,7 +27,7 @@ CHANGES
 
 * Release v1.5.0
 * add some unit tests for Trust
-* CLI: remove auth_token, unused vars and add tests
+* CLI: remove auth\_token, unused vars and add tests
 * add some unit tests for ExecuteCommand
 * add some unit tests for the ManagerCommand class
 * simplify packaging with docker
@@ -42,8 +50,8 @@ CHANGES
 -----
 
 * Release v1.3.0 with packaging files
-* Replaces uuid.uuid4 with uuidutils.generate_uuid()
-* [packaging] make docker aware of PKG_VERSION
+* Replaces uuid.uuid4 with uuidutils.generate\_uuid()
+* [packaging] make docker aware of PKG\_VERSION
 * Added support for OpenStack DOMAIN to shell.py
 * Update changelogs and system package versions
 * Clean up oslo imports

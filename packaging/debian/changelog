@@ -1,3 +1,11 @@
+python-synergy-service (1.5.3) unstable; urgency=low
+
+  * Shell version updated
+  * Authorization section updated
+  * Update RPM package dependencies
+
+ -- Ervin Konomi <ervin.konomi@pd.infn.it>  Wed, 20 Sep 2017 10:12:19 +0200
+
 python-synergy-service (1.5.2) unstable; urgency=low
 
   * Fixes on the authorization mechanism

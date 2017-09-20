@@ -1,7 +1,7 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
 Name:             python-synergy-service
-Version:          1.5.2
+Version:          1.5.3
 Release:          2%{?dist}
 Summary:          Synergy service
 
@@ -85,6 +85,11 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Wed Sep 20 2017 Ervin Konomi <ervin.konomi@pd.infn.it> - 1.5.3-1
+- Shell version updated
+- Authorization section updated
+- Update RPM package dependencies
+
 * Mon Aug 21 2017 Vincent Llorens <vincent.llorens@cc.in2p3.fr> - 1.5.2-2
 - Update some python requirements to python2-* names
 
